@@ -1,0 +1,36 @@
+name = "BrewQuiverTerm"
+uuid = "607a7751-7a76-43c6-95ec-8e1ae434617b"
+version = "0.0.1"
+authors = ["Ricardo Rosa <rmsrosa@gmail.com>"]
+
+[deps]
+BeerJSON = "83d47a54-5cce-4e4c-8759-0d683d4236f2"
+BrewQuiver = "118187b7-b799-44b0-b9bb-0e3bc43a37c1"
+BrewQuiverUICore = "a84b7d05-62f3-4b2e-bdcd-30013df68243"
+BrewingFormulas = "a9505d62-7541-4c16-ab4a-19ef00b85701"
+Term = "22787eb5-b846-44ae-b979-8e399b8463ab"
+Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
+UnitfulBrewing = "0971afc3-6d60-4b49-b3a1-be0ef054b0bb"
+
+[sources]
+BeerJSON = {rev = "main", url = "https://github.com/JuliaBrewing/BeerJSON.jl"}
+BrewQuiver = {rev = "main", url = "https://github.com/JuliaBrewing/BrewQuiver.jl"}
+BrewQuiverUICore = {rev = "main", url = "https://github.com/JuliaBrewing/BrewQuiverUICore.jl"}
+BrewingFormulas = {rev = "main", url = "https://github.com/JuliaBrewing/BrewingFormulas.jl"}
+UnitfulBrewing = {rev = "main", url = "https://github.com/JuliaBrewing/UnitfulBrewing.jl"}
+
+[compat]
+BeerJSON = "0.0.1"
+BrewQuiver = "0.0.12 - 0.0"
+BrewQuiverUICore = "0.0.1 - 0.0"
+BrewingFormulas = "0.1.2"
+Term = "2.2"
+Unitful = "1.29.0"
+UnitfulBrewing = "0.1"
+julia = "1.11"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
