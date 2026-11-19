@@ -9,6 +9,7 @@ module BrewQuiverTerm
 
 using Unitful
 using UnitfulBrewing
+using BrewingFormulas: ibu, srm, abv
 using BrewQuiver
 using BrewQuiverUICore
 using Term: Term, Panel, RenderableText
@@ -22,12 +23,17 @@ include("keys.jl")
 include("app.jl")
 include("edit.jl")
 include("render/history.jl")
+include("render/dag.jl")
+include("render/timeline.jl")
+include("render/solve.jl")
+include("views.jl")
 include("render/app.jl")
 include("run.jl")
 
 export render_overview, render_node, render_arrow, render_statusbar, render_text
-export render_history
-export App, Mode, Browse, Inspect, Help, Prompt, Confirm, HistoryView, handle!, decode_keys, render_app,
+export render_history, render_dag, render_timeline, render_solution, parse_solve, clock
+export App, Mode, Browse, Inspect, Help, Prompt, Confirm, HistoryView, DagView, TimelineView,
+    SolutionView, handle!, decode_keys, render_app,
     open_file
 
 end # module

@@ -169,7 +169,10 @@ end
         ls = split(render_text(render_app(app; width = 100, height = 20)), '\n')
         @test occursin(":bottles", ls[2]) && occursin("Esc back", ls[end])
         handle!(app, '?')
+        @test !occursin("this help", render_text(render_app(app; width = 100, height = 30)))
+        for _ in 1:20; handle!(app, :down); end                # scrolled to the end
         @test occursin("this help", render_text(render_app(app; width = 100, height = 30)))
+        @test app.mode isa Help
         handle!(app, :esc); handle!(app, 'S')
         ls = split(render_text(render_app(app; width = 100, height = 20)), '\n')
         @test occursin("Save as: quiver.quiver.json▏", ls[end-1]) && occursin("Esc: cancel", ls[end])
@@ -201,4 +204,9 @@ end
                                      output = IOBuffer(), size = (24, 90)).session |> isbrewed
         end
     end
+end
+
+@testset "Help fits" begin
+    using Term: remove_markup
+    @test all(textwidth(remove_markup(l)) ≤ 94 for l in split(BrewQuiverTerm.HELP, '\n'))
 end

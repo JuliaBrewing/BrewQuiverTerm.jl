@@ -114,5 +114,6 @@ end
 
 include("app.jl")
 include("edit.jl")
+include("views.jl")
 
 end
