@@ -38,8 +38,32 @@ print(render_statusbar(s))
 `▶` marks the selection, `✱` the nodes that changed in the last edit (also highlighted), `⚠`
 the nodes with warnings; `██` is the color of the beer.
 
-Coming next: the interactive app (`BrewQuiverTerm.run("bitter.quiver.json")`) with
-navigation, editing, undo and redo, the timeline and the targets.
+## The app
+
+```julia
+using BrewQuiverTerm
+BrewQuiverTerm.run("bitter.quiver.json")     # a quiver; or a BeerJSON recipe, imported; or nothing
+```
+
+| keys | |
+|---|---|
+| `↓` `↑` `j` `k`, `PgDn` `PgUp`, `g` `G` | move between the nodes, in topological order |
+| `Tab` `Shift-Tab` | the node and the arrows leaving it |
+| `Enter` `i` `→` | inspect the node or arrow (`↓` `↑` scroll, `j` `k` move) |
+| `Esc` `q` `←` | back to the overview |
+| `s` `Ctrl-S`, `S` | save, save as |
+| `o` `Ctrl-O` | open a quiver, or import a BeerJSON recipe |
+| `?` | the keys |
+| `q` `Ctrl-C` | quit, asking about unsaved changes (save, discard, cancel) |
+
+The app is an `App` (a session of BrewQuiverUICore, whose selection is the cursor, and a
+mode: `Browse`, `Inspect`, `Prompt`, `Confirm`, `Help`); `handle!(app, key)` does what a key
+does in its mode, and `render_app(app; width, height)` draws a frame, so both are tested
+with sequences of keys, without a terminal. `BrewQuiverTerm.run` only reads the keys (raw
+mode, `decode_keys`), handles them and draws the frames on the alternate screen.
+
+Coming next: editing with undo and redo, the history, the timeline, the targets, and a
+drawing of the quiver.
 
 ## License
 
