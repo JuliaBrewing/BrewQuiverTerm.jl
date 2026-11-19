@@ -53,6 +53,13 @@ BrewQuiverTerm.run("bitter.quiver.json")     # a quiver; or a BeerJSON recipe, i
 | `Esc` `q` `←` | back to the overview |
 | `s` `Ctrl-S`, `S` | save, save as |
 | `o` `Ctrl-O` | open a quiver, or import a BeerJSON recipe |
+| `e` | edit: the amount of a lot (`4.8 kg`, `17 L`, `2`), or a field of an arrow, chosen by its number (`70 min`, `90%`, `at 55 min`, empty for the vessel's or the default) |
+| `a` | add a node: its label, and its vessel if any (`trub kettle`) |
+| `c` | connect the node to another: its label, and the kind of arrow if not a transfer (`wort boil`) |
+| `r`, `v` | rename the node, set its vessel |
+| `x` `Delete` | remove the node (asking first) or the arrow |
+| `u` `Ctrl-Z`, `U` `Ctrl-Y` | undo, redo (the selection follows) |
+| `h` | the history of the edits |
 | `?` | the keys |
 | `q` `Ctrl-C` | quit, asking about unsaved changes (save, discard, cancel) |
 
@@ -62,8 +69,12 @@ does in its mode, and `render_app(app; width, height)` draws a frame, so both ar
 with sequences of keys, without a terminal. `BrewQuiverTerm.run` only reads the keys (raw
 mode, `decode_keys`), handles them and draws the frames on the alternate screen.
 
-Coming next: editing with undo and redo, the history, the timeline, the targets, and a
-drawing of the quiver.
+Every edit is a command of BrewQuiverUICore: a refused one (a value in the wrong unit, an
+edit after which the quiver would no longer brew) changes nothing and shows why; the nodes
+an edit changed are marked `✱` in the overview; the status bar shows what undo would undo.
+Values are read with `parse_value`, the inverse of how they are shown.
+
+Coming next: the timeline, the targets, and a drawing of the quiver.
 
 ## License
 
