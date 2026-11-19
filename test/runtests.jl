@@ -113,5 +113,6 @@ end
 end
 
 include("app.jl")
+include("edit.jl")
 
 end

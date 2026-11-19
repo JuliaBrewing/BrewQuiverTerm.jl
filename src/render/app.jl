@@ -10,6 +10,17 @@ const HELP = """
   Enter  i  →     inspect the node or arrow
   Esc  q  ←       back to the overview
 
+{bold}Editing{/bold}  (each edit can be undone; the nodes it changed are marked ✱)
+  e               edit: the amount of a lot, or a field of an arrow
+  a               add a node: its label, and its vessel if any
+  c               connect the node to another: its label, and the kind of arrow if not a transfer
+  r               rename the node
+  v               the vessel of the node
+  x  Delete       remove the node (asks first) or the arrow
+  u  Ctrl-Z       undo
+  U  Ctrl-Y       redo
+  h               the history of the edits
+
 {bold}Files{/bold}
   s  Ctrl-S       save
   S               save as
@@ -19,8 +30,9 @@ const HELP = """
   q  Ctrl-C       quit (asks about unsaved changes)
 """
 
-hints(::Browse) = "↓↑ move  Tab arrows  Enter inspect  s save  o open  ? help  q quit"
-hints(::Inspect) = "↓↑ scroll  j k move  Tab arrows  Esc back  ? help"
+hints(::Browse) = "↓↑ move  Tab arrows  Enter inspect  e edit  u undo  U redo  ? help  q quit"
+hints(::Inspect) = "↓↑ scroll  j k move  Tab arrows  e edit  u undo  U redo  Esc back  ? help"
+hints(::HistoryView) = "↓↑ scroll  u undo  U redo  any other key: back"
 hints(::Help) = "any key: back"
 hints(::Prompt) = "Enter: ok  Esc: cancel"
 hints(c::Confirm) = join(("$k: $label" for (k, (label, _)) in c.choices), "  ") * "  Esc: cancel"
@@ -31,6 +43,7 @@ main_lines(app::App, ::Inspect, width) = _lines(_inspector(app, current(app), wi
 main_lines(app::App, h::Help, width) = _lines(Panel(block(HELP); title = "keys", width, fit = false,
                                                      title_style = "bold " * ACCENT, style = DIM))
 main_lines(app::App, m::Union{Prompt, Confirm}, width) = main_lines(app, m.back, width)
+main_lines(app::App, ::HistoryView, width) = _lines(render_history(app.session; width))
 
 _inspector(app, r::NodeRef, width) = render_node(app.session, r.label; width)
 _inspector(app, r::ArrowRef, width) = render_arrow(app.session, r; width)

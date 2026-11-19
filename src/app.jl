@@ -243,7 +243,7 @@ function _common!(app::App, key)
     elseif key === :ctrl_c
         quit!(app)
     else
-        return false
+        return _edit_keys!(app, key)
     end
     return true
 end
