@@ -234,6 +234,7 @@ function _common!(app::App, key)
         cycle!(app, -1)
     elseif key === '?'
         app.mode = Help(app.mode)
+        app.scroll = 0
     elseif key in ('s', :ctrl_s)
         save_file!(app)
     elseif key === 'S'
@@ -243,7 +244,7 @@ function _common!(app::App, key)
     elseif key === :ctrl_c
         quit!(app)
     else
-        return _edit_keys!(app, key)
+        return _edit_keys!(app, key) || _view_keys!(app, key)
     end
     return true
 end
@@ -287,7 +288,17 @@ function handle!(app::App, ::Inspect, key)
     return app
 end
 
-handle!(app::App, h::Help, key) = (app.mode = h.back; app)
+function handle!(app::App, h::Help, key)
+    if key === :down
+        app.scroll += 1
+    elseif key === :up
+        app.scroll = max(0, app.scroll - 1)
+    else
+        app.mode = h.back
+        app.scroll = 0
+    end
+    return app
+end
 
 function handle!(app::App, p::Prompt, key)
     if key === :enter

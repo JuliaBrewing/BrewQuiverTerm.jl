@@ -60,6 +60,9 @@ BrewQuiverTerm.run("bitter.quiver.json")     # a quiver; or a BeerJSON recipe, i
 | `x` `Delete` | remove the node (asking first) or the arrow |
 | `u` `Ctrl-Z`, `U` `Ctrl-Y` | undo, redo (the selection follows) |
 | `h` | the history of the edits |
+| `d` | the drawing of the quiver as a layered graph (`l` arranges the nodes, undoably), or back |
+| `t` | the timeline: a bar per vessel when it is busy, and when each node is filled, ready and emptied (`+` `-` zoom on the brew day) |
+| `T` | solve for targets: `fermentor gravity 1.050 sg, wort ibu 30 IBU vary pale crystal, cascade` (lots scaled together, or a field of an arrow: `kettle>wort.time`); the solution is shown, and `u` undoes it |
 | `?` | the keys |
 | `q` `Ctrl-C` | quit, asking about unsaved changes (save, discard, cancel) |
 
@@ -74,7 +77,18 @@ edit after which the quiver would no longer brew) changes nothing and shows why;
 an edit changed are marked `✱` in the overview; the status bar shows what undo would undo.
 Values are read with `parse_value`, the inverse of how they are shown.
 
-Coming next: the timeline, the targets, and a drawing of the quiver.
+```
+  ● pale─────────┬▶○ mash─────────┐ ○ sparge_water─┬▶● grain_bed────┬▶● kettle────────▶● wort ...
+                 │                │                ├────────────────┤
+  ● crystal──────┤                └▶● rested───────┘ ○ cascade──────┘
+                 │
+  ○ strike_water─┘
+```
+
+The drawing takes the positions of the nodes from BrewQuiverUICore (`positions`: those saved
+in the file, or its layered layout): a column per layer, a dot of the color of the beer
+before each label, the arrows to the next layer along the row of their source, and longer
+ones along the empty rows between, so that they never pass behind a node.
 
 ## License
 

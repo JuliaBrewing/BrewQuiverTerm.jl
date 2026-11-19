@@ -13,13 +13,20 @@ const HELP = """
 {bold}Editing{/bold}  (each edit can be undone; the nodes it changed are marked ✱)
   e               edit: the amount of a lot, or a field of an arrow
   a               add a node: its label, and its vessel if any
-  c               connect the node to another: its label, and the kind of arrow if not a transfer
+  c               connect the node to another: its label, and the kind of arrow (wort boil)
   r               rename the node
   v               the vessel of the node
   x  Delete       remove the node (asks first) or the arrow
   u  Ctrl-Z       undo
   U  Ctrl-Y       redo
   h               the history of the edits
+
+{bold}Views{/bold}
+  d               the drawing of the quiver (l arranges the nodes), or back to the overview
+  t               the timeline: when each vessel is busy (+ - zoom on the brew day)
+  T               solve: targets (node quantity goal), vary, as many parameters:
+                  fermentor gravity 1.050 sg, wort ibu 30 IBU vary pale crystal, cascade
+                  (lots scaled together, or a field of an arrow: kettle>wort.time)
 
 {bold}Files{/bold}
   s  Ctrl-S       save
@@ -32,8 +39,11 @@ const HELP = """
 
 hints(::Browse) = "↓↑ move  Tab arrows  Enter inspect  e edit  u undo  U redo  ? help  q quit"
 hints(::Inspect) = "↓↑ scroll  j k move  Tab arrows  e edit  u undo  U redo  Esc back  ? help"
+hints(::DagView) = "↓↑ j k move  Tab arrows  Enter inspect  l arrange  d overview  e edit  u undo  ? help"
+hints(::TimelineView) = "+ - zoom  ↓↑ scroll  any other key: back"
+hints(::SolutionView) = "any key: back (u undoes the solve)"
 hints(::HistoryView) = "↓↑ scroll  u undo  U redo  any other key: back"
-hints(::Help) = "any key: back"
+hints(::Help) = "↓↑ scroll  any other key: back"
 hints(::Prompt) = "Enter: ok  Esc: cancel"
 hints(c::Confirm) = join(("$k: $label" for (k, (label, _)) in c.choices), "  ") * "  Esc: cancel"
 
@@ -44,6 +54,11 @@ main_lines(app::App, h::Help, width) = _lines(Panel(block(HELP); title = "keys",
                                                      title_style = "bold " * ACCENT, style = DIM))
 main_lines(app::App, m::Union{Prompt, Confirm}, width) = main_lines(app, m.back, width)
 main_lines(app::App, ::HistoryView, width) = _lines(render_history(app.session; width))
+main_lines(app::App, ::DagView, width) =
+    _lines(Panel(render_dag(app.session; width = width - 6, focus = current_node(app)); title = "quiver",
+                 title_style = "bold " * ACCENT, width, fit = false, style = DIM))
+main_lines(app::App, v::TimelineView, width) = _lines(render_timeline(app.session; width, zoom = v.zoom))
+main_lines(app::App, v::SolutionView, width) = _lines(render_solution(v.solution; width))
 
 _inspector(app, r::NodeRef, width) = render_node(app.session, r.label; width)
 _inspector(app, r::ArrowRef, width) = render_arrow(app.session, r; width)
