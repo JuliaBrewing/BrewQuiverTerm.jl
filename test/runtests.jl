@@ -112,4 +112,6 @@ end
     @test occursin(r"\d warnings", render_text(render_statusbar(Session(q))))
 end
 
+include("app.jl")
+
 end
