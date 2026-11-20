@@ -68,6 +68,9 @@ BrewQuiverTerm.run("bitter.quiver.json")     # a quiver; or a BeerJSON recipe, i
 | `d` | the drawing of the quiver as a layered graph (`l` arranges the nodes, undoably), or back |
 | `t` | the timeline: a bar per vessel when it is busy, and when each node is filled, ready and emptied (`+` `-` zoom on the brew day) |
 | `T` | solve for targets: `fermentor gravity 1.050 sg, wort ibu 30 IBU vary pale crystal, cascade` (lots scaled together, or a field of an arrow: `kettle>wort.time`); the solution is shown, and `u` undoes it |
+| `M` | the models of BrewingFormulas the brew uses: bitterness, color, ABV, gravity (undoable) |
+| `I` | the inventory: what the brew needs of each ingredient, with the stock of the library (`C` takes it from the stock, `W` writes the library) |
+| `X` | export the recipes of the brew, as BeerJSON |
 | `?` | the keys |
 | `q` `Ctrl-C` | quit, asking about unsaved changes (save, discard, cancel) |
 

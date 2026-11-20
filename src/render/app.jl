@@ -32,6 +32,12 @@ const HELP = """
                   fermentor gravity 1.050 sg, wort ibu 30 IBU vary pale crystal, cascade
                   (lots scaled together, or a field of an arrow: kettle>wort.time)
 
+{bold}Brewing{/bold}
+  M               the models: bitterness, color, ABV, gravity (undoable)
+  I               the inventory: what the brew needs, with the stock of the library
+                  (C takes it from the stock, W writes the library)
+  X               export the recipes, as BeerJSON
+
 {bold}Files{/bold}
   s  Ctrl-S       save
   S               save as
@@ -45,6 +51,7 @@ hints(::Browse) = "↓↑ move  Tab arrows  Enter inspect  e edit  u undo  U red
 hints(::Inspect) = "↓↑ scroll  j k move  Tab arrows  e edit  u undo  U redo  Esc back  ? help"
 hints(::DagView) = "↓↑ j k move  Tab arrows  Enter inspect  l arrange  d overview  e edit  u undo  ? help"
 hints(::TimelineView) = "+ - zoom  ↓↑ scroll  any other key: back"
+hints(::InventoryView) = "C take from the stock  W write the library  ↓↑ scroll  any other key: back"
 hints(::SolutionView) = "any key: back (u undoes the solve)"
 hints(::HistoryView) = "↓↑ scroll  u undo  U redo  any other key: back"
 hints(::Help) = "↓↑ scroll  any other key: back"
@@ -62,6 +69,7 @@ main_lines(app::App, ::DagView, width) =
     _lines(Panel(render_dag(app.session; width = width - 6, focus = current_node(app)); title = "quiver",
                  title_style = "bold " * ACCENT, width, fit = false, style = DIM))
 main_lines(app::App, v::TimelineView, width) = _lines(render_timeline(app.session; width, zoom = v.zoom))
+main_lines(app::App, ::InventoryView, width) = _lines(render_inventory(app.session; width))
 main_lines(app::App, v::SolutionView, width) = _lines(render_solution(v.solution; width))
 
 _inspector(app, r::NodeRef, width) = render_node(app.session, r.label; width)

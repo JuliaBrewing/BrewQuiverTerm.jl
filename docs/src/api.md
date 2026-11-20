@@ -18,6 +18,7 @@ render_node
 render_arrow
 render_statusbar
 render_history
+render_inventory
 render_dag
 render_timeline
 render_solution
@@ -43,4 +44,5 @@ HistoryView
 DagView
 TimelineView
 SolutionView
+InventoryView
 ```

@@ -230,5 +230,6 @@ load_library!(app::App) =
     ask!(app, "Load a library of ingredients (a BeerJSON document)") do app, path
         isfile(path) || throw(ArgumentError("there is no file $path"))
         set_library!(app.session, path)
+        app.library_path = String(path)
         info!(app, "loaded $(length(library(app.session))) ingredients from $(basename(path))")
     end

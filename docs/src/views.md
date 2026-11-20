@@ -66,6 +66,19 @@ text(render_solution(sol; width = 90))
 text(render_history(s; width = 80))
 ```
 
+## The inventory
+
+[`render_inventory`](@ref): what the brew needs of each ingredient, with the stock of the
+library of the session (here, one with a part of the malt and plenty of hops):
+
+```@example views
+lib = Library()
+push!(lib, pale; stock = 3u"kg")
+push!(lib, cascade; stock = 100u"g")
+set_library!(s, lib)
+text(render_inventory(s; width = 90))
+```
+
 ## The status bar
 
 ```@example views
