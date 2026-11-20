@@ -17,9 +17,9 @@ s: a stage  l: a lot of an ingredient  w: water  Esc: cancel</code></pre><p><cod
 answer!(app, &quot;strike_water 16 L 75 °C&quot;)
 screen(app; height = 14)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">new quiver ●  │  brewed  │  undo: Add :strike_water
 ╭──── lots ────────────────────────────────────────────────────────────────────────────────────────╮
-│       Lot           Contents  Next                                                               │
-│  ───  ────────────  ────────  ────                                                               │
-│  ▶✱   strike_water     16 L   –                                                                  │
+│       Lot           Contents   Next                                                              │
+│  ───  ────────────  ─────────  ────                                                              │
+│  ▶✱   strike_water     16.0 L  –                                                                 │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
 
 
@@ -31,14 +31,14 @@ Add :strike_water: connect it with c
 ↓↑ move  Tab arrows  Enter inspect  e edit  u undo  U redo  ? help  q quit</code></pre><p>The new node is selected, and the message reminds us to connect it.</p><h2 id="Lots-of-ingredients"><a class="docs-heading-anchor" href="#Lots-of-ingredients">Lots of ingredients</a><a id="Lots-of-ingredients-1"></a><a class="docs-heading-anchor-permalink" href="#Lots-of-ingredients" title="Permalink"></a></h2><p>A lot is a label, an amount and an ingredient. The quiver has no ingredients yet, so the app offers to define it:</p><pre><code class="language-julia hljs">press!(app, &quot;al&quot;)
 answer!(app, &quot;pale 4.5 kg Pale ale malt&quot;)
 screen(app; height = 6)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">new quiver ●  │  brewed  │  undo: Add :strike_water
-│  ───  ────────────  ────────  ────                                                               │
-│  ▶✱   strike_water     16 L   –                                                                  │
+│  ───  ────────────  ─────────  ────                                                              │
+│  ▶✱   strike_water     16.0 L  –                                                                 │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
 There is no ingredient named &quot;Pale ale malt&quot;. Define it as a
 f: fermentable  h: hop  c: culture  Esc: cancel</code></pre><pre><code class="language-julia hljs">press!(app, &quot;f&quot;)
 screen(app; height = 6)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">new quiver ●  │  brewed  │  undo: Add :strike_water
-│  ───  ────────────  ────────  ────                                                               │
-│  ▶✱   strike_water     16 L   –                                                                  │
+│  ───  ────────────  ─────────  ────                                                              │
+│  ▶✱   strike_water     16.0 L  –                                                                 │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
 New fermentable &quot;Pale ale malt&quot;, e.g. yield 80%, color 9 °L: ▏
 Enter: ok  Esc: cancel</code></pre><pre><code class="language-julia hljs">answer!(app, &quot;yield 80%, color 3 °L&quot;)
@@ -50,13 +50,13 @@ press!(app, &quot;al&quot;); answer!(app, &quot;yeast 1 US-05&quot;)
 press!(app, &quot;c&quot;); answer!(app, &quot;attenuation 78%, form dry&quot;)
 screen(app; height = 16)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">new quiver ●  │  brewed  │  undo: Add :yeast
 ╭──── lots ────────────────────────────────────────────────────────────────────────────────────────╮
-│       Lot           Contents                 Next                                                │
-│  ───  ────────────  ───────────────────────  ────                                                │
-│       strike_water     16 L                  –                                                   │
-│       pale          ██ 4.5 kg Pale ale malt  –                                                   │
-│       crystal       ██ 300 g Crystal 60      –                                                   │
-│       cascade          50 g Cascade          –                                                   │
-│  ▶✱   yeast            1 × US-05             –                                                   │
+│       Lot           Contents                  Next                                               │
+│  ───  ────────────  ────────────────────────  ────                                               │
+│       strike_water     16.0 L                 –                                                  │
+│       pale          ██ 4.50 kg Pale ale malt  –                                                  │
+│       crystal       ██ 300 g Crystal 60       –                                                  │
+│       cascade          50 g Cascade           –                                                  │
+│  ▶✱   yeast            1 × US-05              –                                                  │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
 
 
@@ -77,13 +77,13 @@ end</code></pre><h2 id="Arrows"><a class="docs-heading-anchor" href="#Arrows">Ar
 end
 screen(app; height = 40)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">new quiver ●  │  brewed  │  undo: Connect :fermentor =&gt; :beer with a Ferment
 ╭──── lots ────────────────────────────────────────────────────────────────────────────────────────╮
-│       Lot           Contents                 Next                                                │
-│  ───  ────────────  ───────────────────────  ───────────                                         │
-│       strike_water     16 L                  → mash                                              │
-│       pale          ██ 4.5 kg Pale ale malt  → mash                                              │
-│       crystal       ██ 300 g Crystal 60      → mash                                              │
-│       cascade          50 g Cascade          → kettle                                            │
-│       yeast            1 × US-05             → fermentor                                         │
+│       Lot           Contents                  Next                                               │
+│  ───  ────────────  ────────────────────────  ───────────                                        │
+│       strike_water     16.0 L                 → mash                                             │
+│       pale          ██ 4.50 kg Pale ale malt  → mash                                             │
+│       crystal       ██ 300 g Crystal 60       → mash                                             │
+│       cascade          50 g Cascade           → kettle                                           │
+│       yeast            1 × US-05              → fermentor                                        │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
 ╭──── mashtun ─────────────────────────────────────────────────────────────────────────────────────╮
 │       Node    Volume  Gravity   ABV   IBU    Color       Temp.    pH    Next                     │
@@ -117,19 +117,19 @@ Connect :fermentor =&gt; :beer with a Ferment
 ↓↑ move  Tab arrows  Enter inspect  e edit  u undo  U redo  ? help  q quit</code></pre><p>The batch brews, chilled to 20 °C before the fermentor: with no sparge, 16 L of water give a small, strong wort, which the next section fixes. The <code>⚠</code> on the mash is a warning of its mash pH: crystal malt was given no distilled water pH (the inspector, <code>Enter</code>, says so).</p><h2 id="Editing,-and-undo"><a class="docs-heading-anchor" href="#Editing,-and-undo">Editing, and undo</a><a id="Editing,-and-undo-1"></a><a class="docs-heading-anchor-permalink" href="#Editing,-and-undo" title="Permalink"></a></h2><p><code>e</code> edits the item of the cursor; on water, it asks what to edit, and we take more water:</p><pre><code class="language-julia hljs">select!(app.session, NodeRef(:strike_water))
 press!(app, &quot;e&quot;)
 screen(app; height = 5)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">new quiver ●  │  brewed  │  undo: Connect :fermentor =&gt; :beer with a Ferment
-│  ───  ────────────  ───────────────────────  ───────────                                         │
-│  ▶    strike_water     16 L                  → mash                                              │
+│  ───  ────────────  ────────────────────────  ───────────                                        │
+│  ▶    strike_water     16.0 L                 → mash                                             │
 Edit :strike_water
 1: volume  2: temperature  3: water profile  Esc: cancel</code></pre><pre><code class="language-julia hljs">press!(app, &quot;1&quot;); answer!(app, &quot;24 L&quot;)
 screen(app; height = 34)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">new quiver ●  │  brewed  │  undo: Set :strike_water to 24 L
 ╭──── lots ────────────────────────────────────────────────────────────────────────────────────────╮
-│       Lot           Contents                 Next                                                │
-│  ───  ────────────  ───────────────────────  ───────────                                         │
-│  ▶✱   strike_water     24 L                  → mash                                              │
-│       pale          ██ 4.5 kg Pale ale malt  → mash                                              │
-│       crystal       ██ 300 g Crystal 60      → mash                                              │
-│       cascade          50 g Cascade          → kettle                                            │
-│       yeast            1 × US-05             → fermentor                                         │
+│       Lot           Contents                  Next                                               │
+│  ───  ────────────  ────────────────────────  ───────────                                        │
+│  ▶✱   strike_water     24.0 L                 → mash                                             │
+│       pale          ██ 4.50 kg Pale ale malt  → mash                                             │
+│       crystal       ██ 300 g Crystal 60       → mash                                             │
+│       cascade          50 g Cascade           → kettle                                           │
+│       yeast            1 × US-05              → fermentor                                        │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
 ╭──── mashtun ─────────────────────────────────────────────────────────────────────────────────────╮
 │       Node    Volume  Gravity   ABV   IBU    Color       Temp.    pH    Next                     │
@@ -265,6 +265,6 @@ screen(app; height = 16)</code></pre><pre class="documenter-example-output"><cod
 Solve for the original_gravity of :beer
 any key: back (u undoes the solve)</code></pre><h2 id="Saving"><a class="docs-heading-anchor" href="#Saving">Saving</a><a id="Saving-1"></a><a class="docs-heading-anchor-permalink" href="#Saving" title="Permalink"></a></h2><p><code>s</code> saves (asking for a path the first time), and <code>q</code> quits, asking first if there are unsaved changes:</p><pre><code class="language-julia hljs">press!(app, &quot;\eS&quot;); answer!(app, joinpath(mktempdir(), &quot;bitter.quiver.json&quot;))
 screen(app; height = 3)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">bitter.quiver.json  │  brewed  │  undo: Solve for the original_gravity of :beer
-│  ▶    strike_water     24 L                    → mash                                            │
+│  ▶    strike_water     24.0 L                 → mash                                             │
 saved bitter.quiver.json
-↓↑ move  Tab arrows  Enter inspect  e edit  u undo  U redo  ? help  q quit</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><a class="docs-footer-nextpage" href="../views/">Views »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.20.0 on <span class="colophon-date" title="Friday 20 November 2026 23:08">Friday 20 November 2026</span>. Using Julia version 1.13.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+↓↑ move  Tab arrows  Enter inspect  e edit  u undo  U redo  ? help  q quit</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><a class="docs-footer-nextpage" href="../views/">Views »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.20.0 on <span class="colophon-date" title="Friday 20 November 2026 23:52">Friday 20 November 2026</span>. Using Julia version 1.13.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
