@@ -37,6 +37,8 @@ const HELP = """
   I               the inventory: what the brew needs, with the stock of the library
                   (C takes it from the stock, W writes the library)
   X               export the recipes, as BeerJSON
+  P               the units of each kind of quantity (malts, hops, volumes, ...), shown and
+                  typed: a number typed without a unit is in the unit shown
 
 {bold}Files{/bold}
   s  Ctrl-S       save
@@ -70,7 +72,7 @@ main_lines(app::App, ::DagView, width) =
                  title_style = "bold " * ACCENT, width, fit = false, style = DIM))
 main_lines(app::App, v::TimelineView, width) = _lines(render_timeline(app.session; width, zoom = v.zoom))
 main_lines(app::App, ::InventoryView, width) = _lines(render_inventory(app.session; width))
-main_lines(app::App, v::SolutionView, width) = _lines(render_solution(v.solution; width))
+main_lines(app::App, v::SolutionView, width) = _lines(render_solution(app.session, v.solution; width))
 
 _inspector(app, r::NodeRef, width) = render_node(app.session, r.label; width)
 _inspector(app, r::ArrowRef, width) = render_arrow(app.session, r; width)

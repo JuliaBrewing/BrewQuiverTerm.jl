@@ -48,8 +48,10 @@ What the brew of `s` needs of each ingredient, with the stock of the library of 
 and `⚠` for what is short (or not known to be in stock).
 """
 function render_inventory(s::Session; width::Integer = 100)
-    rows = Vector{String}[[plain(r.name), _amount_text(r.needed),
-             r.stock === nothing ? styled("–", DIM) : _amount_text(r.stock),
+    cat = catalog(s)
+    role(name) = haskey(cat, name) ? unit_role(cat[name]) : nothing
+    rows = Vector{String}[[plain(r.name), _amount_text(s, r.needed, role(r.name)),
+             r.stock === nothing ? styled("–", DIM) : _amount_text(s, r.stock, role(r.name)),
              r.short ? styled("⚠ short", WARNING) : styled("✓", SELECTED)] for r in inventory_rows(s)]
     n = length(library(s))
     head = block(isbrewed(s) ? styled("the library has $n ingredient" * (n == 1 ? "" : "s"), DIM) :
@@ -57,8 +59,8 @@ function render_inventory(s::Session; width::Integer = 100)
     return Panel(head / table(["Ingredient", "Needed", "In stock", ""], rows); title = "inventory",
                  title_style = "bold " * ACCENT, width, fit = false, style = DIM)
 end
-_amount_text(x::Real) = "$(round(Int, x)) ×"
-_amount_text(x) = value_text(x)
+_amount_text(s, x::Real, role) = "$(round(Int, x)) ×"
+_amount_text(s, x, role) = qtext(s, x; role)
 
 function handle!(app::App, v::InventoryView, key)
     if key === 'C'
@@ -96,8 +98,52 @@ function _brewing_keys!(app::App, key)
     elseif key === 'I'
         app.mode = InventoryView(app.mode)
         app.scroll = 0
+    elseif key === 'P'
+        units_menu!(app)
     else
         return false
     end
     return true
 end
+
+# ---------------------------------------------------------------------------------------
+# preferred units
+
+# the roles of units, by key, as the menu shows them
+const UNIT_KEYS = ['f' => (:fermentable, "malts and sugars"), 'h' => (:hop, "hops"),
+                   'c' => (:culture, "yeast (masses)"), 's' => (:agent, "salts and acids"),
+                   'm' => (:mass, "other masses"), 'v' => (:volume, "volumes"),
+                   't' => (:temperature, "temperatures"), 'g' => (:gravity, "gravities"),
+                   'o' => (:color, "colors"), 'a' => (:absorption, "absorptions"),
+                   'r' => (:rate, "rates")]
+
+_unit_label(u::Unitful.Units) = unit_symbol(u)
+_unit_label(::Symbol) = "auto"
+
+# `P`: the preferred units, saved for the next times
+function units_menu!(app::App)
+    p = units(app.session)
+    menu!(app, "Units of", [k => ("$label ($(_unit_label(p[role])))", app -> units_menu!(app, role, label))
+                            for (k, (role, label)) in UNIT_KEYS])
+end
+
+function units_menu!(app::App, role::Symbol, label)
+    p = units(app.session)
+    choices = [Char('0' + i) => (_unit_label(u) * (u == p[role] ? " (in use)" : ""),
+                                 app -> set_unit!(app, role, label, u))
+               for (i, u) in enumerate(UNIT_CHOICES[role])]
+    return menu!(app, "Units of $label", choices)
+end
+
+function set_unit!(app::App, role, label, u)
+    set_units!(app.session, with_unit(units(app.session), role, u))
+    path = try
+        save_units(units(app.session))
+    catch e
+        e isa Union{SystemError, Base.IOError, ArgumentError} || rethrow()
+        return error!(app, "$label in $(_unit_label(u)), but the preferences could not be saved")
+    end
+    return info!(app, "$label in $(_unit_label(u)) (saved in $(contractuser(path)))")
+end
+
+contractuser(path) = (h = homedir(); startswith(path, h) ? "~" * path[length(h)+1:end] : path)

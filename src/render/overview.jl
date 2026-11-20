@@ -14,11 +14,11 @@ end
 const STAGE_HEADER = ["", "Node", "Volume", "Gravity", "ABV", "IBU", "Color", "Temp.", "pH", "Next"]
 const LOT_HEADER = ["", "Lot", "Contents", "Next"]
 
-function stage_row(x::NodeSummary, out)
+function stage_row(s, x::NodeSummary, out)
     return [marks(x), label_text(x.label, x.selected, x.changed),
-            value_text(x.volume), value_text(x.gravity), value_text(x.abv), value_text(x.ibu),
-            x.srm === missing ? styled("–", DIM) : swatch(x.color) * " " * value_text(x.srm),
-            value_text(x.temperature), value_text(x.mash_ph),
+            qtext(s, x.volume), qtext(s, x.gravity), value_text(x.abv), value_text(x.ibu),
+            x.srm === missing ? styled("–", DIM) : swatch(x.color) * " " * qtext(s, x.srm),
+            qtext(s, x.temperature), value_text(x.mash_ph),
             next_text(out)]
 end
 
@@ -47,7 +47,7 @@ function render_overview(s::Session; width::Integer = 100)
     panels = Any[]
     for (v, labels) in vessel_groups(s)
         rows = [v === nothing ? lot_row(summaries[n], get(out, n, ArrowSummary[])) :
-                                stage_row(summaries[n], get(out, n, ArrowSummary[])) for n in labels]
+                                stage_row(s, summaries[n], get(out, n, ArrowSummary[])) for n in labels]
         t = table(v === nothing ? LOT_HEADER : STAGE_HEADER, rows; maxwidth = 40)
         title = v === nothing ? "lots" : plain(v)
         push!(panels, Panel(t; title, title_style = "bold " * ACCENT, width, fit = false,

@@ -43,26 +43,31 @@ function _parameter(p)
 end
 
 """
-    render_solution(sol; width = 100)
+    render_solution(sol; width = 100, units = UnitPreferences())
+    render_solution(s::Session, sol; width = 100)
 
 A `Solution` of `Solve`: whether it converged and in how many iterations, the
-values of the parameters, and each target with its goal and what was reached.
+values of the parameters, and each target with its goal and what was reached, in the
+preferred `units` (those of the session `s`).
 """
-function render_solution(sol; width::Integer = 100)
+render_solution(s::Session, sol; width::Integer = 100) = render_solution(sol; width, units = s)
+function render_solution(sol; width::Integer = 100, units = UnitPreferences())
+    p = units
     r = solution_rows(sol)
     head = r.converged ? styled("converged in $(r.iterations) iteration" * (r.iterations == 1 ? "" : "s"), SELECTED) :
                          styled("did not converge in $(r.iterations) iterations: the quiver is left at the best point found", WARNING)
-    params = table(["Parameter", "Value"], [[plain(p.name), _value_text(p.value)] for p in r.parameters])
+    params = table(["Parameter", "Value"], [[plain(x.name), _value_text(p, x.value)] for x in r.parameters])
     targets = table(["Node", "Quantity", "Goal", "Reached"],
-                    [[plain(t.node), t.quantity, value_text(t.goal), value_text(t.reached)] for t in r.targets])
+                    [[plain(t.node), t.quantity, qtext(p, t.goal), qtext(p, t.reached)] for t in r.targets])
     return Panel(block(head) / section("parameters") / params / section("targets") / targets;
                  title = "solution", title_style = "bold " * ACCENT, width, fit = false, style = DIM)
 end
 
 # the value of a parameter: the contents of lots, or the value of a field
-_value_text(x) = value_text(x)
-_value_text(c::Contents) = _contents_text(c)
-_value_text(d::AbstractDict) = join((":$k " * _contents_text(v) for (k, v) in sort(collect(d); by = first)), ", ")
-_contents_text(c::Contents) =
-    isempty(c.solids) ? value_text(uconvert(u"L", volume(c))) :
-    join((value_text(r.amount) * " " * plain(r.name) for r in solid_rows(c)), ", ")
+_value_text(p, x) = qtext(p, x)
+_value_text(p, c::Contents) = _contents_text(p, c)
+_value_text(p, d::AbstractDict) = join((":$k " * _contents_text(p, v) for (k, v) in sort(collect(d); by = first)), ", ")
+_contents_text(p, c::Contents) =
+    isempty(c.solids) ? qtext(p, uconvert(u"L", volume(c)); role = :volume) :
+    join((qtext(p, x.amount; role = _solid_role(x)) * " " * plain(r.name)
+          for (x, r) in zip(c.solids, solid_rows(c))), ", ")

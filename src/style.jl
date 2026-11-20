@@ -44,6 +44,11 @@ value_text(x::AbstractString) = plain(x)
 value_text(x::Union{Remaining, At}) = format(x)
 value_text(x) = plain(string(nameof(typeof(x))))
 
+# a value in the preferred units of a session (or of preferences), for a quantity of `role`
+qtext(s, x::Unitful.Quantity; role = unit_role(x)) = plain(format(s, x; role))
+qtext(s, t::Union{Remaining, At}; role = nothing) = plain(format(s, t))
+qtext(s, x; role = nothing) = value_text(x)
+
 # a fraction as a percentage
 fraction_text(x::Real) = format(100x * u"percent")
 fraction_text(x) = value_text(x)

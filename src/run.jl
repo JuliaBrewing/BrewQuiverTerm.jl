@@ -13,6 +13,12 @@ the terminal. Returns the [`App`](@ref) when it quits (or when `input` ends).
 function run(path::Union{Nothing, AbstractString} = nothing; library = nothing, input::IO = stdin,
              output::IO = stdout, size = nothing)
     app = App(path === nothing ? Session(Quiver()) : open_file(path))
+    try
+        set_units!(app.session, load_units())         # (the preferred units, if saved)
+    catch e
+        e isa ArgumentError || rethrow()
+        error!(app, "the preferred units were not read: " * e.msg)
+    end
     if library !== nothing
         paths = library isa AbstractString ? [library] : collect(library)
         set_library!(app.session, paths...)
