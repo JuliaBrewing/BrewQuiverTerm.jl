@@ -66,8 +66,7 @@ using BeerJSON: BeerJSONParser
             @test occursin(r"Pale ale malt\s+4.50 kg\s+3.00 kg\s+⚠ short", t)
             @test occursin(r"Cascade\s+50 g\s+100 g\s+✓", t)
             @test occursin(r"Crystal 60\s+300 g\s+–\s+⚠ short", t)
-            # (a count in stock, of yeast packs, is not kept in the files of libraries)
-            @test occursin(r"US-05\s+1 ×\s+–\s+⚠ short", t)
+            @test occursin(r"US-05\s+1 ×\s+2 ×\s+✓", t)          # (a count of packs, kept in the file)
             @test occursin("C take from the stock", t)
             handle!(app, 'C')
             @test app.mode isa Confirm
@@ -79,7 +78,7 @@ using BeerJSON: BeerJSONParser
             handle!(app, 'W')
             @test app.mode.buffer == f
             handle!(app, :enter)
-            @test ok(app) && stock(Library(f), "Cascade") ≈ 50u"g"
+            @test ok(app) && stock(Library(f), "Cascade") ≈ 50u"g" && stock(Library(f), "US-05") == 1
             handle!(app, :esc)
             @test app.mode isa Browse
             # without a library, and without a brew
