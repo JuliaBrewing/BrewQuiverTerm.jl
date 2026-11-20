@@ -116,5 +116,6 @@ include("app.jl")
 include("edit.jl")
 include("views.jl")
 include("build.jl")
+include("brewing.jl")
 
 end

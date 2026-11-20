@@ -63,7 +63,7 @@ end
 
 The state of the interactive app: the `Session` of BrewQuiverUICore being edited
 (whose selection is the cursor of the app), the [`Mode`](@ref), the scroll of the main view,
-the last message, and whether to quit. Keys are given to [`handle!`](@ref), frames drawn
+the last message, whether to quit, and the file of the library of ingredients. Keys are given to [`handle!`](@ref), frames drawn
 with [`render_app`](@ref).
 """
 mutable struct App
@@ -73,8 +73,10 @@ mutable struct App
     message::String
     iserror::Bool
     quit::Bool
+    # the file of the library of ingredients, to save its stock
+    library_path::Union{Nothing, String}
 end
-App(s::Session) = (app = App(s, Browse(), 0, "", false, false); _select_first!(app); app)
+App(s::Session) = (app = App(s, Browse(), 0, "", false, false, nothing); _select_first!(app); app)
 
 _select_first!(app) =
     (ns = nodes(quiver(app.session)); isempty(ns) || select!(app.session, NodeRef(first(ns))); app)
@@ -158,6 +160,7 @@ end
 
 function load!(app::App, path::AbstractString)
     s = open_file(path)
+    set_library!(s, library(app.session))             # (the library stays loaded)
     app.session = s
     app.mode = Browse()
     app.scroll = 0
@@ -244,7 +247,7 @@ function _common!(app::App, key)
     elseif key === :ctrl_c
         quit!(app)
     else
-        return _edit_keys!(app, key) || _view_keys!(app, key)
+        return _edit_keys!(app, key) || _view_keys!(app, key) || _brewing_keys!(app, key)
     end
     return true
 end

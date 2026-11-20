@@ -13,7 +13,11 @@ the terminal. Returns the [`App`](@ref) when it quits (or when `input` ends).
 function run(path::Union{Nothing, AbstractString} = nothing; library = nothing, input::IO = stdin,
              output::IO = stdout, size = nothing)
     app = App(path === nothing ? Session(Quiver()) : open_file(path))
-    library === nothing || set_library!(app.session, (library isa AbstractString ? [library] : library)...)
+    if library !== nothing
+        paths = library isa AbstractString ? [library] : collect(library)
+        set_library!(app.session, paths...)
+        length(paths) == 1 && (app.library_path = String(only(paths)))
+    end
     term = input isa Base.TTY ? REPL.Terminals.TTYTerminal("", input, output, stderr) : nothing
     term === nothing || REPL.Terminals.raw!(term, true)
     print(output, "\e[?1049h\e[?25l")              # the alternate screen, no cursor

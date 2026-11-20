@@ -12,8 +12,10 @@ function render_statusbar(s::Session; width::Integer = 100)
     isdirty(s) && (file *= " " * styled("●", CHANGED))
     st = isbrewed(s) ? styled("brewed", SELECTED) :
                        styled("does not brew: " * plain(first(sprint(show, status(s)), 60)), WARNING)
-    n = length(warnings(s))
     parts = [file, st]
+    isempty(models(s)) ||
+        push!(parts, styled("models: ", DIM) * join((string(nameof(typeof(m))) for m in values(models(s))), ", "))
+    n = length(warnings(s))
     n > 0 && push!(parts, styled("$n warning" * (n == 1 ? "" : "s"), WARNING))
     u = undo_description(s)
     u === nothing || push!(parts, styled("undo: ", DIM) * plain(u))
