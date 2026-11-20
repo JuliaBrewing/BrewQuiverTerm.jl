@@ -44,11 +44,13 @@ function arrow_kind!(app::App, r::ArrowRef)
 end
 
 function edit_field!(app::App, r::ArrowRef, f::FieldSpec)
-    current = f.value === nothing ? "" :
-              f.fraction && f.value isa Real ? format(100f.value * u"percent") : format(f.value)
+    role = field_role(quiver(app.session), r, f)
+    shown = f.fraction && f.value isa Real ? 100f.value * u"percent" : f.value
+    current = shown === nothing ? "" : qtext(app.session, shown; role)
     ask!(app, "$(f.label) of :$(r.source) → :$(r.destination)" * (r.index > 1 ? " #$(r.index)" : ""),
          current) do app, text
-        edit!(app, SetArrowField(r.source, r.destination, r.index, f.name, parse_value(text)))
+        edit!(app, SetArrowField(r.source, r.destination, r.index, f.name,
+                                 parse_value(app.session, text, shown; role)))
     end
 end
 

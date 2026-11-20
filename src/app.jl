@@ -161,6 +161,7 @@ end
 function load!(app::App, path::AbstractString)
     s = open_file(path)
     set_library!(s, library(app.session))             # (the library stays loaded)
+    set_units!(s, units(app.session))                 # (and so do the units)
     app.session = s
     app.mode = Browse()
     app.scroll = 0

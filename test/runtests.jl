@@ -9,6 +9,9 @@ using BrewQuiverTerm: plain, table, block
 
 include("quivers.jl")
 
+# (the preferences of units of the tests, not those of the user)
+ENV["XDG_CONFIG_HOME"] = mktempdir()
+
 lines(x) = split(render_text(x), '\n')
 stripped(x) = join(rstrip.(lines(x)), '\n')
 # the row of a node in the overview, by its label column
@@ -34,7 +37,7 @@ end
     for title in ("lots", "mashtun", "kettle", "fermentor", "bottles")
         @test occursin("── $title ─", text)
     end
-    @test occursin("4.5 kg Pale ale malt", text) && occursin("→ mash", text)
+    @test occursin("4.50 kg Pale ale malt", text) && occursin("→ mash", text)
     @test occursin("Boil → wort", text) && occursin("→ grain_bed, kettle", text)
     wort = row(ls, "wort")
     @test occursin("1.0", wort) && occursin(" sg", wort) && occursin("IBU", wort) && occursin("°C", wort)
@@ -117,5 +120,6 @@ include("edit.jl")
 include("views.jl")
 include("build.jl")
 include("brewing.jl")
+include("units.jl")
 
 end

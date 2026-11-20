@@ -27,23 +27,25 @@ end
 
 edit_lot!(app::App, n, c, ::Stage) = error!(app, ":$n is filled by its arrows: edit them (Tab to select one)")
 edit_lot!(app::App, n, c, ::Mixed) = error!(app, ":$n holds several things: set them on the lots it comes from")
-edit_lot!(app::App, n, c, ::AgentLot) = edit_amount!(app, n, format(total_mass(c)))
+edit_lot!(app::App, n, c, ::AgentLot) = edit_amount!(app, n, total_mass(c), :agent)
 edit_lot!(app::App, n, c, ::IngredientLot) =
-    menu!(app, "Edit :$n", ['1' => ("amount", app -> edit_amount!(app, n, format(only(c.solids).amount))),
+    menu!(app, "Edit :$n", ['1' => ("amount", app -> edit_amount!(app, n, only(c.solids).amount,
+                                                                     unit_role(only(c.solids).ingredient))),
                             '2' => ("ingredient", app -> edit_ingredient!(app, n, only(c.solids).ingredient))])
 edit_lot!(app::App, n, c, ::WaterLot) =
-    menu!(app, "Edit :$n", ['1' => ("volume", app -> edit_amount!(app, n, format(volume(c)))),
+    menu!(app, "Edit :$n", ['1' => ("volume", app -> edit_amount!(app, n, uconvert(u"L", volume(c)), :volume)),
                             '2' => ("temperature", app -> edit_temperature!(app, n, c)),
                             '3' => ("water profile", app -> edit_profile!(app, n, c))])
 
-edit_amount!(app::App, n, current) =
-    ask!(app, "Amount of :$n", current) do app, text
-        edit!(app, SetAmount(n, parse_value(text)))
+# (shown, and read when typed without a unit, in the preferred unit of `role`)
+edit_amount!(app::App, n, current, role) =
+    ask!(app, "Amount of :$n", qtext(app.session, current; role)) do app, text
+        edit!(app, SetAmount(n, parse_value(app.session, text, current; role)))
     end
 
 edit_temperature!(app::App, n, c) =
-    ask!(app, "Temperature of :$n", format(c.liquor.temperature)) do app, text
-        edit!(app, SetTemperature(n, parse_value(text)))
+    ask!(app, "Temperature of :$n", qtext(app.session, c.liquor.temperature)) do app, text
+        edit!(app, SetTemperature(n, parse_value(app.session, text, c.liquor.temperature)))
     end
 
 const IONS = (:calcium, :magnesium, :sodium, :chloride, :sulfate, :bicarbonate)
@@ -163,7 +165,9 @@ add_lot!(app::App) =
     ask!(app, "Add a lot: its label, amount and ingredient (e.g. munich 0.5 kg Munich malt)") do app, text
         label, amount, name = parse_lot(text)
         with_ingredient(app, name) do app, i
-            _added!(app, AddNode(label, i => amount))
+            # (a bare number: the preferred unit of the ingredient, but a count of a culture)
+            a = amount isa Real && !(i isa Culture) ? amount * preferred_unit(units(app.session), unit_role(i)) : amount
+            _added!(app, AddNode(label, i => a))
         end
     end
 
@@ -186,20 +190,24 @@ function parse_lot(text)
     return _label(words[1]), amount, join(words[k:end], " ")
 end
 
-# "strike_water 16 L 75 °C" as (:strike_water, 16 L, 75 °C); 20 °C if not given
-function parse_water(text)
+# "strike_water 16 L 75 °C" as (:strike_water, 16 L, 75 °C); 20 °C if not given; numbers
+# without units in `volume` and `temperature`, if given
+function parse_water(text; volume = nothing, temperature = nothing)
     words = split(text)
     length(words) ≥ 2 || throw(ArgumentError("give a label and a volume: strike_water 16 L 75 °C"))
     v, k = quantity_at(words, 2)
+    v isa Real && volume !== nothing && (v = v * volume)
     v isa Unitful.Volume || throw(ArgumentError("give the volume of the water, e.g. 16 L"))
-    t = k ≤ length(words) ? parse_value(join(words[k:end], " ")) : 20.0u"°C"
+    t = k ≤ length(words) ? parse_value(join(words[k:end], " "); unit = temperature) : 20.0u"°C"
     t isa Unitful.Temperature || throw(ArgumentError("give the temperature of the water, e.g. 75 °C"))
     return _label(words[1]), v, t
 end
 
 add_water!(app::App) =
     ask!(app, "Add water: its label, volume and temperature (e.g. strike_water 16 L 75 °C)") do app, text
-        label, v, temperature = parse_water(text)
+        p = units(app.session)
+        label, v, temperature = parse_water(text; volume = preferred_unit(p, :volume),
+                                            temperature = preferred_unit(p, :temperature))
         _added!(app, AddNode(label, water(v; temperature)))
     end
 
@@ -219,8 +227,9 @@ function edit_equipment!(app::App)
 end
 
 function edit_equipment_field!(app::App, v, f::FieldSpec)
-    ask!(app, "$(f.label) of the $v", f.value === nothing ? "" : format(f.value)) do app, text
-        value = f.name === :name ? String(strip(text)) : parse_value(text)
+    role = field_role(f)
+    ask!(app, "$(f.label) of the $v", f.value === nothing ? "" : qtext(app.session, f.value; role)) do app, text
+        value = f.name === :name ? String(strip(text)) : parse_value(app.session, text, f.value; role)
         edit!(app, SetEquipmentField(v, f.name, value))
     end
 end

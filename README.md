@@ -71,6 +71,7 @@ BrewQuiverTerm.run("bitter.quiver.json")     # a quiver; or a BeerJSON recipe, i
 | `M` | the models of BrewingFormulas the brew uses: bitterness, color, ABV, gravity (undoable) |
 | `I` | the inventory: what the brew needs of each ingredient, with the stock of the library (`C` takes it from the stock, `W` writes the library) |
 | `X` | export the recipes of the brew, as BeerJSON |
+| `P` | the units of each kind of quantity: malts, hops, yeast, salts, volumes, temperatures, gravities, colors, ... (saved in `~/.config/brewquiver/units.toml`) |
 | `?` | the keys |
 | `q` `Ctrl-C` | quit, asking about unsaved changes (save, discard, cancel) |
 
@@ -83,7 +84,10 @@ mode, `decode_keys`), handles them and draws the frames on the alternate screen.
 Every edit is a command of BrewQuiverUICore: a refused one (a value in the wrong unit, an
 edit after which the quiver would no longer brew) changes nothing and shows why; the nodes
 an edit changed are marked `✱` in the overview; the status bar shows what undo would undo.
-Values are read with `parse_value`, the inverse of how they are shown. Ingredients are found
+Values are read with `parse_value`, the inverse of how they are shown. Each kind of quantity
+is shown in its preferred unit (`P`: malts in lb, hops in oz, volumes in gal, ...), and a
+number typed without a unit is in the unit shown (`25` replacing `27.0 L` is 25 L; `2500 mL`
+is read as typed); for an empty field, in the preferred unit of its kind. Ingredients are found
 by name (or a part of it) among those of the quiver, of the library, and the salts and acids
 of brewing water; so a whole batch can be built from an empty quiver: water, lots, stages in
 their vessels, and the arrows between them.
