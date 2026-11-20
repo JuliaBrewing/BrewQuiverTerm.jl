@@ -13,33 +13,37 @@ end
 # ask for a line of text, then do `f(app, text)`
 ask!(f, app::App, question, buffer = "") = (app.mode = Prompt(question, buffer, f, app.mode); app)
 
-_lot(c::Contents) = (iszero(c.liquor) && length(c.solids) == 1 && only(c.solids) isa Portion) ||
-                    (isempty(c.solids) && !iszero(c.liquor))
-
-# the amount of a lot, as typed
-_amount(c::Contents) = isempty(c.solids) ? format(volume(c)) : format(only(c.solids).amount)
-
-# `e`: the amount of a lot, or a field of an arrow
-edit_item!(app::App, ::Nothing) = app
-function edit_item!(app::App, r::NodeRef)
-    c = quiver(app.session)[r.label].initial
-    _lot(c) || return error!(app, iszero(c) ?
-        ":$(r.label) is filled by its arrows: edit them (Tab to select one)" :
-        ":$(r.label) holds several things: its amount cannot be set in one number")
-    ask!(app, "Amount of :$(r.label)", _amount(c)) do app, text
-        edit!(app, SetAmount(r.label, parse_value(text)))
-    end
-end
-function edit_item!(app::App, r::ArrowRef)
-    a = quiver(app.session)[r.source => r.destination, r.index]
-    fs = fields(a)
-    choices = [Char('0' + i) => (f.label, app -> edit_field!(app, r, f)) for (i, f) in enumerate(fs) if i ≤ 9]
-    app.mode = Confirm("Edit which field of the $(nameof(typeof(a)))?", choices, app.mode)
+# a menu of keys, each closing it before doing its action
+function menu!(app::App, question, choices)
+    back = app.mode
+    app.mode = Confirm(question, [k => (label, app -> (app.mode = back; action(app)))
+                                  for (k, (label, action)) in choices], back)
     return app
 end
 
+# `e`: edit the item of the cursor (see lots.jl for the nodes)
+edit_item!(app::App, ::Nothing) = app
+function edit_item!(app::App, r::ArrowRef)
+    a = quiver(app.session)[r.source => r.destination, r.index]
+    choices = Pair{Char, Tuple{String, Any}}['0' => ("kind", app -> arrow_kind!(app, r))]
+    for (i, f) in enumerate(fields(a))
+        i ≤ 9 && push!(choices, Char('0' + i) => (f.label, app -> edit_field!(app, r, f)))
+    end
+    return menu!(app, "Edit which field of the $(nameof(typeof(a)))?", choices)
+end
+
+# the kind of an arrow, replaced by a new one of that kind, with its defaults
+function arrow_kind!(app::App, r::ArrowRef)
+    a = quiver(app.session)[r.source => r.destination, r.index]
+    ask!(app, "Kind of :$(r.source) → :$(r.destination) (" * join(sort(collect(keys(ARROW_KINDS))), ", ") * ")",
+         lowercase(string(nameof(typeof(a))))) do app, text
+        kind = get(ARROW_KINDS, lowercase(strip(text)), nothing)
+        kind === nothing && return error!(app, "$(repr(String(strip(text)))) is not a kind of arrow")
+        edit!(app, SetArrow(r.source, r.destination, r.index, kind()))
+    end
+end
+
 function edit_field!(app::App, r::ArrowRef, f::FieldSpec)
-    app.mode = app.mode isa Confirm ? app.mode.back : app.mode
     current = f.value === nothing ? "" :
               f.fraction && f.value isa Real ? format(100f.value * u"percent") : format(f.value)
     ask!(app, "$(f.label) of :$(r.source) → :$(r.destination)" * (r.index > 1 ? " #$(r.index)" : ""),
@@ -58,19 +62,6 @@ function rename_node!(app::App)
 end
 
 _label(text) = Symbol(strip(lstrip(strip(text), ':')))
-
-# `a`: add a node, "label" or "label vessel"
-function add_node!(app::App)
-    ask!(app, "Add a node (label, and its vessel if any)") do app, text
-        words = split(text)
-        isempty(words) && return error!(app, "give a label")
-        label = _label(words[1])
-        vessel = length(words) > 1 ? _label(words[2]) : nothing
-        edit!(app, AddNode(label; vessel))
-        haskey(quiver(app.session), label) && select!(app.session, NodeRef(label))
-        app
-    end
-end
 
 # the arrows that can be connected by name, with their defaults
 const ARROW_KINDS = Dict("transfer" => Transfer, "drain" => Drain, "mashrest" => MashRest,
@@ -152,6 +143,10 @@ function _edit_keys!(app::App, key)
     elseif key === 'h'
         app.mode = HistoryView(app.mode)
         app.scroll = 0
+    elseif key === 'E'
+        edit_equipment!(app)
+    elseif key === 'L'
+        load_library!(app)
     else
         return false
     end

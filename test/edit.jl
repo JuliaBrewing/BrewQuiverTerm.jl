@@ -8,26 +8,26 @@ goto!(app, label) = select!(app.session, NodeRef(label))
 @testset "Editing" begin
     @testset "Amounts of lots" begin
         app = App(Session(single_batch()))
-        handle!(app, 'e')
+        handle!(app, 'e'); handle!(app, '1')
         @test app.mode isa Prompt && app.mode.question == "Amount of :pale" && app.mode.buffer == "4.50 kg"
         answer!(app, "4.8 kg")
         @test app.mode isa Browse && amount(app.session, :pale) ≈ 4.8u"kg"
         @test app.message == "Set :pale to 4.8 kg" && !app.iserror
         @test :bottles in changed(app.session)
         @test occursin("✱", render_text(render_app(app; width = 110, height = 60)))
-        goto!(app, :strike_water); handle!(app, 'e')
+        goto!(app, :strike_water); handle!(app, 'e'); handle!(app, '1')
         @test app.mode.buffer == "16.0 L"
         answer!(app, "17 L")
         @test volume(quiver(app.session)[:strike_water].initial) ≈ 17u"L"
-        goto!(app, :yeast); handle!(app, 'e'); answer!(app, "2")
+        goto!(app, :yeast); handle!(app, 'e'); handle!(app, '1'); answer!(app, "2")
         @test amount(app.session, :yeast) == 2
         # refused: the quiver would not brew, or the text is not a value
-        goto!(app, :strike_water); handle!(app, 'e'); answer!(app, "1 L")
+        goto!(app, :strike_water); handle!(app, 'e'); handle!(app, '1'); answer!(app, "1 L")
         @test app.iserror && occursin("would no longer brew", app.message)
         @test volume(quiver(app.session)[:strike_water].initial) ≈ 17u"L"
-        handle!(app, 'e'); answer!(app, "plenty")
+        handle!(app, 'e'); handle!(app, '1'); answer!(app, "plenty")
         @test app.iserror && occursin("not a number", app.message)
-        handle!(app, 'e'); handle!(app, :esc)
+        handle!(app, 'e'); handle!(app, '1'); handle!(app, :esc)
         @test app.mode isa Browse && volume(quiver(app.session)[:strike_water].initial) ≈ 17u"L"
         # a stage has no amount
         goto!(app, :kettle); handle!(app, 'e')
@@ -40,7 +40,7 @@ goto!(app, label) = select!(app.session, NodeRef(label))
         @test current(app) == ArrowRef(:kettle, :wort, 1)
         handle!(app, 'e')
         @test app.mode isa Confirm && occursin("Boil", app.mode.question)
-        @test [label for (_, (label, _)) in app.mode.choices] == ["time", "evaporation", "stand", "stand temperature"]
+        @test [label for (_, (label, _)) in app.mode.choices] == ["kind", "time", "evaporation", "stand", "stand temperature"]
         handle!(app, '1')
         @test app.mode isa Prompt && app.mode.buffer == "60 min"
         answer!(app, "70 min")
@@ -75,9 +75,9 @@ goto!(app, label) = select!(app.session, NodeRef(label))
         @test haskey(quiver(app.session), :boiler) && current(app) == NodeRef(:boiler)
         handle!(app, 'r'); answer!(app, ":wort")
         @test app.iserror && occursin("already a node", app.message)
-        handle!(app, 'a'); answer!(app, "trub boiler")
+        handle!(app, 'a'); handle!(app, 's'); answer!(app, "trub boiler")
         @test vessel(quiver(app.session), :trub) == :boiler && current(app) == NodeRef(:trub)
-        handle!(app, 'a'); answer!(app, "   ")
+        handle!(app, 'a'); handle!(app, 's'); answer!(app, "   ")
         @test app.iserror
         handle!(app, 'v')
         @test app.mode.buffer == "boiler"
@@ -111,7 +111,7 @@ goto!(app, label) = select!(app.session, NodeRef(label))
         app = App(Session(single_batch()))
         handle!(app, 'u')
         @test app.iserror && app.message == "nothing to undo"
-        handle!(app, 'e'); answer!(app, "4.8 kg")
+        handle!(app, 'e'); handle!(app, '1'); answer!(app, "4.8 kg")
         goto!(app, :kettle); handle!(app, 'r'); answer!(app, "boiler")
         handle!(app, 'u')
         @test app.message == "undid Rename :kettle to :boiler" && haskey(quiver(app.session), :kettle)

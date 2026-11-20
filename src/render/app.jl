@@ -11,8 +11,12 @@ const HELP = """
   Esc  q  ←       back to the overview
 
 {bold}Editing{/bold}  (each edit can be undone; the nodes it changed are marked ✱)
-  e               edit: the amount of a lot, or a field of an arrow
-  a               add a node: its label, and its vessel if any
+  e               edit: a lot (amount, ingredient; water: volume, temperature, profile),
+                  or an arrow (its kind, or a field)
+  a               add a stage, a lot of an ingredient (munich 0.5 kg Munich malt), or water
+                  (strike_water 16 L 75 °C); an unknown ingredient can be defined there
+  E               the equipment of the vessel of the node
+  L               load a library of ingredients (a BeerJSON document)
   c               connect the node to another: its label, and the kind of arrow (wort boil)
   r               rename the node
   v               the vessel of the node
