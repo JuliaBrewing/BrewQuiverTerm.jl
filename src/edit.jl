@@ -114,7 +114,7 @@ function redo_step!(app::App)
 end
 
 """
-    History(back)
+    HistoryView(back)
 
 The history of the edits; any key but the arrows goes `back`.
 """
