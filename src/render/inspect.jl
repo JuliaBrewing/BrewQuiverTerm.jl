@@ -66,6 +66,12 @@ function render_node(s::Session, label::Symbol; width::Integer = 80)
     end
     push!(parts, section("from"), block(arrows_text(d.incoming, a -> "← " * plain(a.source))))
     push!(parts, section("to"), block(arrows_text(d.outgoing, a -> "→ " * plain(a.destination))))
+    eq = x.vessel === nothing ? nothing : equipment(quiver(s), x.vessel)
+    if eq !== nothing
+        ps = [f.label => (f.fraction && f.value isa Real ? fraction_text(f.value) : value_text(f.value))
+              for f in fields(eq) if f.value !== nothing && f.value != ""]
+        push!(parts, section("equipment of the $(plain(x.vessel))"), block(pairs_text(ps)))
+    end
     isempty(x.warnings) ||
         push!(parts, section("warnings"), block(join((styled("⚠ " * plain(w), WARNING) for w in x.warnings), "\n")))
     title = plain(":" * String(label)) * (x.vessel === nothing ? "" : "  in the $(plain(x.vessel))")
