@@ -61,7 +61,7 @@ end
 """
     App(session)
 
-The state of the interactive app: the [`Session`](@ref) of BrewQuiverUICore being edited
+The state of the interactive app: the `Session` of BrewQuiverUICore being edited
 (whose selection is the cursor of the app), the [`Mode`](@ref), the scroll of the main view,
 the last message, and whether to quit. Keys are given to [`handle!`](@ref), frames drawn
 with [`render_app`](@ref).

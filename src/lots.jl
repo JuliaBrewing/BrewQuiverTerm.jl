@@ -111,8 +111,7 @@ function with_ingredient(f, app::App, text, kind = nothing)
 end
 
 function define_ingredient!(f, app::App, name, label, T, props)
-    ask!(app, "$(uppercasefirst(label)) $(repr(String(name))): " * join(props, ", ") *
-              " (e.g. " * EXAMPLES[label] * ")") do app, text
+    ask!(app, "New $label $(repr(String(name))), e.g. " * EXAMPLES[label]) do app, text
         f(app, T(String(name); parse_properties(text, props)...))
     end
 end

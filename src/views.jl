@@ -21,7 +21,7 @@ end
 """
     SolutionView(back, solution)
 
-The solution of the last [`Solve`](@ref).
+The solution of the last `Solve`.
 """
 struct SolutionView <: Mode
     back::Mode

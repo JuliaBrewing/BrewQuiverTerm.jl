@@ -8,7 +8,7 @@ const TARGET_QUANTITIES = Dict(
 """
     parse_solve(text) -> Solve
 
-The [`Solve`](@ref) command of what is typed: targets, then `vary` and the parameters, as
+The `Solve` command of what is typed: targets, then `vary` and the parameters, as
 many as the targets, separated by commas:
 
     fermentor gravity 1.050 sg, wort ibu 30 IBU vary pale crystal, cascade
@@ -45,7 +45,7 @@ end
 """
     render_solution(sol; width = 100)
 
-A `Solution` of [`Solve`](@ref): whether it converged and in how many iterations, the
+A `Solution` of `Solve`: whether it converged and in how many iterations, the
 values of the parameters, and each target with its goal and what was reached.
 """
 function render_solution(sol; width::Integer = 100)

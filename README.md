@@ -1,11 +1,14 @@
 # BrewQuiverTerm
 
-[![CI](https://github.com/JuliaBrewing/BrewQuiverTerm.jl/actions/workflows/ci.yml/badge.svg)](https://github.com/JuliaBrewing/BrewQuiverTerm.jl/actions/workflows/ci.yml)
+[![Docs](https://img.shields.io/badge/docs-dev-blue.svg)](https://JuliaBrewing.github.io/BrewQuiverTerm.jl/dev/) [![CI](https://github.com/JuliaBrewing/BrewQuiverTerm.jl/actions/workflows/ci.yml/badge.svg)](https://github.com/JuliaBrewing/BrewQuiverTerm.jl/actions/workflows/ci.yml)
 
 A terminal user interface for [BrewQuiver.jl](https://github.com/JuliaBrewing/BrewQuiver.jl),
 built with [Term.jl](https://github.com/FedeClaudi/Term.jl) on
 [BrewQuiverUICore.jl](https://github.com/JuliaBrewing/BrewQuiverUICore.jl), the core it shares
 with the graphical interface.
+
+The [documentation](https://JuliaBrewing.github.io/BrewQuiverTerm.jl/dev/) has a tutorial
+that builds a batch from scratch with the keys, the views, the keys, and the API reference.
 
 This package is **under development** and not registered. It takes BrewQuiver, its siblings
 and BrewQuiverUICore from GitHub through the `[sources]` of `Project.toml` (Julia 1.11 or
