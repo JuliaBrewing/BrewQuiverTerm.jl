@@ -3,7 +3,6 @@ using Unitful
 using UnitfulBrewing
 using BrewingFormulas
 using BrewQuiver
-using BrewQuiverUICore
 using BrewQuiverTerm
 using BrewQuiverTerm: plain, table, block
 
@@ -18,6 +17,12 @@ stripped(x) = join(rstrip.(lines(x)), '\n')
 row(ls, label) = only(l for l in ls if occursin(Regex("^│  .{3}  $(label) "), l))
 
 @testset "BrewQuiverTerm" begin
+
+@testset "One package to load" begin
+    # the API of BrewQuiverUICore comes with BrewQuiverTerm
+    @test isdefined(@__MODULE__, :open_session) && open_session === BrewQuiverTerm.BrewQuiverUICore.open_session
+    @test all(n -> Base.isexported(BrewQuiverTerm, n), filter(!=(:BrewQuiverUICore), names(BrewQuiverTerm.BrewQuiverUICore)))
+end
 
 @testset "Style" begin
     @test plain("Weird {name}") == "Weird (name)"

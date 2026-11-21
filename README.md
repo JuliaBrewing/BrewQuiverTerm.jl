@@ -14,13 +14,17 @@ This package is **under development** and not registered. It takes BrewQuiver, i
 and BrewQuiverUICore from GitHub through the `[sources]` of `Project.toml` (Julia 1.11 or
 later).
 
+To update, run `Pkg.update()` in the environment of the app, then restart Julia: the
+packages taken from GitHub stay at the revision they were installed at until then (an
+`UndefVarError` from BrewQuiverUICore when the app starts means it is older than the app).
+
 ## Rendering
 
 The rendering functions are pure: they take a session of BrewQuiverUICore and return Term
 renderables, so they are tested without a terminal.
 
 ```julia
-using BrewQuiverUICore, BrewQuiverTerm
+using BrewQuiverTerm     # (with the API of BrewQuiverUICore: sessions, commands, ...)
 
 s = open_session("bitter.quiver.json")
 print(render_overview(s; width = 110))     # a panel per vessel, with the results of its nodes

@@ -1,7 +1,7 @@
 # Views
 
 ```@setup views
-using BrewQuiverTerm, BrewQuiverUICore, BrewQuiver, Unitful, UnitfulBrewing
+using BrewQuiverTerm, BrewQuiver, Unitful, UnitfulBrewing
 include(joinpath(pkgdir(BrewQuiverTerm), "docs", "quivers.jl"))
 text(x) = println(join(rstrip.(split(render_text(x), '\n')), '\n'))
 s = Session(single_batch())
