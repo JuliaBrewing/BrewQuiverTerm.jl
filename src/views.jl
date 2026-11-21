@@ -89,4 +89,8 @@ function handle!(app::App, v::TimelineView, key)
     return app
 end
 
-handle!(app::App, v::SolutionView, key) = (app.mode = v.back; app)
+function handle!(app::App, v::SolutionView, key)
+    app.mode = v.back
+    key in ('u', :ctrl_z) && undo_step!(app)          # (undo the solve)
+    return app
+end

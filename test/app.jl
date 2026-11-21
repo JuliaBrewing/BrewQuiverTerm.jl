@@ -1,6 +1,7 @@
 # The interactive app: keys, modes, files, frames and the loop, without a terminal.
 
 using BrewQuiverTerm: current, window
+using Term: RenderableText
 
 type!(app, text) = foreach(k -> handle!(app, k), decode_keys(text))
 sel(app) = current(app)
@@ -160,14 +161,14 @@ end
         f = render_app(app; width = 100, height = 20)
         ls = split(render_text(f), '\n')
         @test length(ls) == 20
-        @test occursin("new quiver ●", ls[1]) && occursin("q quit", ls[end])
+        @test occursin("new quiver ●", ls[1]) && occursin(r"q\s+quit", ls[end])
         @test any(l -> occursin("▶", l) && occursin("pale", l), ls)
         handle!(app, :end)
         ls = split(render_text(render_app(app; width = 100, height = 20)), '\n')
         @test length(ls) == 20 && any(l -> occursin("▶", l) && occursin("bottles", l), ls)
         handle!(app, :enter)
         ls = split(render_text(render_app(app; width = 100, height = 20)), '\n')
-        @test occursin(":bottles", ls[2]) && occursin("Esc back", ls[end])
+        @test occursin(":bottles", ls[2]) && occursin(r"Esc\s+back", ls[end])
         handle!(app, '?')
         @test !occursin("this help", render_text(render_app(app; width = 100, height = 30)))
         for _ in 1:20; handle!(app, :down); end                # scrolled to the end
@@ -175,14 +176,32 @@ end
         @test app.mode isa Help
         handle!(app, :esc); handle!(app, 'S')
         ls = split(render_text(render_app(app; width = 100, height = 20)), '\n')
-        @test occursin("Save as: quiver.quiver.json▏", ls[end-1]) && occursin("Esc: cancel", ls[end])
+        @test occursin("Save as: quiver.quiver.json▏", ls[end-1]) && occursin(r"Esc\s+cancel", ls[end])
         handle!(app, :esc); handle!(app, :ctrl_c)              # (in the inspector, q goes back)
         ls = split(render_text(render_app(app; width = 100, height = 20)), '\n')
-        @test occursin("unsaved changes", ls[end-1]) && occursin("s: save first", ls[end])
+        @test occursin("unsaved changes", ls[end-1]) && occursin(r"s\s+save first", ls[end]) && !occursin(":", ls[end])
         handle!(app, 'c'); handle!(app, 'o'); handle!(app, 'd')
         type!(app, "/no/such/file"); handle!(app, :enter)
         ls = split(render_text(render_app(app; width = 100, height = 20)), '\n')
         @test occursin("no file", ls[end-1])
+    end
+
+    @testset "Key hints" begin
+        using BrewQuiverTerm: hints, hints_text, keycap
+        @test hints(Browse())[end] == ("q" => "quit")
+        @test hints(Prompt("x", "", nothing, Browse())) == ["Enter" => "ok", "Esc" => "cancel"]
+        c = Confirm("Quit?", ['s' => ("save first", identity), 'd' => ("discard them", identity)], Browse())
+        @test hints(c) == ["s" => "save first", "d" => "discard them", "Esc" => "cancel"]
+        # each key in reverse video, then what it does, without colons
+        k = string(RenderableText(keycap("q"); width = 3))
+        @test occursin("\e[7m q \e[27m", k)
+        @test render_text(RenderableText(hints_text(["q" => "quit", "?" => "help"]); width = 30)) |> rstrip ==
+              " q  quit   ?  help"
+        f = render_app(App(Session(single_batch())); width = 100, height = 20)
+        @test count("\e[7m", last(split(f, '\n'))) == length(hints(Browse()))
+        # on a narrow screen, the last hint stays
+        t = render_text(RenderableText(hints_text(hints(Browse()); width = 30); width = 30))
+        @test occursin("quit", t) && occursin("move", t) && !occursin("redo", t)
     end
 
     @testset "The loop" begin

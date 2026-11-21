@@ -67,7 +67,7 @@ using BeerJSON: BeerJSONParser
             @test occursin(r"Cascade\s+50 g\s+100 g\s+✓", t)
             @test occursin(r"Crystal 60\s+300 g\s+–\s+⚠ short", t)
             @test occursin(r"US-05\s+1 ×\s+2 ×\s+✓", t)          # (a count of packs, kept in the file)
-            @test occursin("C take from the stock", t)
+            @test occursin(r"C\s+take from the stock", t)
             handle!(app, 'C')
             @test app.mode isa Confirm
             handle!(app, 'n')

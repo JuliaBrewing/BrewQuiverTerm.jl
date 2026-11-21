@@ -81,7 +81,7 @@ function render_dag(s::Session; cell::Integer = 14, width::Union{Nothing, Intege
         c = node_color(s, n)
         name = plain(t[nextind(t, 1, 2):end])
         n in changed(s) && (name = styled(name, "bold " * CHANGED))
-        n in sel && (name = styled(name, "reverse"))
+        n in sel && (name = styled(name, "inverse"))
         grid[y, x] = (c === nothing ? styled("○", DIM) : styled("●", c)) * " " * name
         for k in 1:textwidth(t)-1
             grid[y, x+k] = ""
