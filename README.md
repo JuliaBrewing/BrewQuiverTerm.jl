@@ -14,6 +14,10 @@ This package is **under development** and not registered. It takes BrewQuiver, i
 and BrewQuiverUICore from GitHub through the `[sources]` of `Project.toml` (Julia 1.11 or
 later).
 
+To update, run `Pkg.update()` in the environment of the app, then restart Julia: the
+packages taken from GitHub stay at the revision they were installed at until then (an
+`UndefVarError` from BrewQuiverUICore when the app starts means it is older than the app).
+
 ## Rendering
 
 The rendering functions are pure: they take a session of BrewQuiverUICore and return Term
