@@ -7,13 +7,13 @@ screen(app; height = 8)</code></pre><pre class="documenter-example-output"><code
 
 
 
-↓↑ move  Tab arrows  Enter inspect  e edit  u undo  U redo  ? help  q quit</code></pre><h2 id="Water"><a class="docs-heading-anchor" href="#Water">Water</a><a id="Water-1"></a><a class="docs-heading-anchor-permalink" href="#Water" title="Permalink"></a></h2><p><code>a</code> adds a node, and asks which kind:</p><pre><code class="language-julia hljs">press!(app, &quot;a&quot;)
+ ↓↑  move   Tab  arrows   Enter  inspect   e  edit   u  undo   U  redo   ?  help   q  quit</code></pre><h2 id="Water"><a class="docs-heading-anchor" href="#Water">Water</a><a id="Water-1"></a><a class="docs-heading-anchor-permalink" href="#Water" title="Permalink"></a></h2><p><code>a</code> adds a node, and asks which kind:</p><pre><code class="language-julia hljs">press!(app, &quot;a&quot;)
 screen(app; height = 6)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">new quiver ●  │  brewed
 ╭──── quiver ──────────────────────────────────────────────────────────────────────────────────────╮
 │  an empty quiver: add a node                                                                     │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
 Add
-s: a stage  l: a lot of an ingredient  w: water  Esc: cancel</code></pre><p><code>w</code> for water, then its label, volume and temperature:</p><pre><code class="language-julia hljs">press!(app, &quot;w&quot;)
+ s  a stage   l  a lot of an ingredient   w  water   Esc  cancel</code></pre><p><code>w</code> for water, then its label, volume and temperature:</p><pre><code class="language-julia hljs">press!(app, &quot;w&quot;)
 answer!(app, &quot;strike_water 16 L 75 °C&quot;)
 screen(app; height = 14)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">new quiver ●  │  brewed  │  undo: Add :strike_water
 ╭──── lots ────────────────────────────────────────────────────────────────────────────────────────╮
@@ -28,20 +28,20 @@ screen(app; height = 14)</code></pre><pre class="documenter-example-output"><cod
 
 
 Add :strike_water: connect it with c
-↓↑ move  Tab arrows  Enter inspect  e edit  u undo  U redo  ? help  q quit</code></pre><p>The new node is selected, and the message reminds us to connect it.</p><h2 id="Lots-of-ingredients"><a class="docs-heading-anchor" href="#Lots-of-ingredients">Lots of ingredients</a><a id="Lots-of-ingredients-1"></a><a class="docs-heading-anchor-permalink" href="#Lots-of-ingredients" title="Permalink"></a></h2><p>A lot is a label, an amount and an ingredient. The quiver has no ingredients yet, so the app offers to define it:</p><pre><code class="language-julia hljs">press!(app, &quot;al&quot;)
+ ↓↑  move   Tab  arrows   Enter  inspect   e  edit   u  undo   U  redo   ?  help   q  quit</code></pre><p>The new node is selected, and the message reminds us to connect it.</p><h2 id="Lots-of-ingredients"><a class="docs-heading-anchor" href="#Lots-of-ingredients">Lots of ingredients</a><a id="Lots-of-ingredients-1"></a><a class="docs-heading-anchor-permalink" href="#Lots-of-ingredients" title="Permalink"></a></h2><p>A lot is a label, an amount and an ingredient. The quiver has no ingredients yet, so the app offers to define it:</p><pre><code class="language-julia hljs">press!(app, &quot;al&quot;)
 answer!(app, &quot;pale 4.5 kg Pale ale malt&quot;)
 screen(app; height = 6)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">new quiver ●  │  brewed  │  undo: Add :strike_water
 │  ───  ────────────  ─────────  ────                                                              │
 │  ▶✱   strike_water     16.0 L  –                                                                 │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
 There is no ingredient named &quot;Pale ale malt&quot;. Define it as a
-f: fermentable  h: hop  c: culture  Esc: cancel</code></pre><pre><code class="language-julia hljs">press!(app, &quot;f&quot;)
+ f  fermentable   h  hop   c  culture   Esc  cancel</code></pre><pre><code class="language-julia hljs">press!(app, &quot;f&quot;)
 screen(app; height = 6)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">new quiver ●  │  brewed  │  undo: Add :strike_water
 │  ───  ────────────  ─────────  ────                                                              │
 │  ▶✱   strike_water     16.0 L  –                                                                 │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
 New fermentable &quot;Pale ale malt&quot;, e.g. yield 80%, color 9 °L: ▏
-Enter: ok  Esc: cancel</code></pre><pre><code class="language-julia hljs">answer!(app, &quot;yield 80%, color 3 °L&quot;)
+ Enter  ok   Esc  cancel</code></pre><pre><code class="language-julia hljs">answer!(app, &quot;yield 80%, color 3 °L&quot;)
 press!(app, &quot;al&quot;); answer!(app, &quot;crystal 0.3 kg Crystal 60&quot;)
 press!(app, &quot;f&quot;); answer!(app, &quot;yield 74%, color 60 °L&quot;)
 press!(app, &quot;al&quot;); answer!(app, &quot;cascade 50 g Cascade&quot;)
@@ -63,7 +63,7 @@ screen(app; height = 16)</code></pre><pre class="documenter-example-output"><cod
 
 
 Add :yeast: connect it with c
-↓↑ move  Tab arrows  Enter inspect  e edit  u undo  U redo  ? help  q quit</code></pre><p>Once defined, an ingredient is found by its name or a part of it: <code>pale2 1 kg pale</code> would take the same malt. Salts and acids are always known (<code>gypsum 4 g gypsum</code>), and a library of ingredients can be loaded with <code>L</code>.</p><h2 id="Stages"><a class="docs-heading-anchor" href="#Stages">Stages</a><a id="Stages-1"></a><a class="docs-heading-anchor-permalink" href="#Stages" title="Permalink"></a></h2><p>The stages of each vessel are empty nodes, filled by the arrows: a label and a vessel.</p><pre><code class="language-julia hljs">for (label, v) in ((&quot;mash&quot;, &quot;mashtun&quot;), (&quot;rested&quot;, &quot;mashtun&quot;), (&quot;kettle&quot;, &quot;kettle&quot;),
+ ↓↑  move   Tab  arrows   Enter  inspect   e  edit   u  undo   U  redo   ?  help   q  quit</code></pre><p>Once defined, an ingredient is found by its name or a part of it: <code>pale2 1 kg pale</code> would take the same malt. Salts and acids are always known (<code>gypsum 4 g gypsum</code>), and a library of ingredients can be loaded with <code>L</code>.</p><h2 id="Stages"><a class="docs-heading-anchor" href="#Stages">Stages</a><a id="Stages-1"></a><a class="docs-heading-anchor-permalink" href="#Stages" title="Permalink"></a></h2><p>The stages of each vessel are empty nodes, filled by the arrows: a label and a vessel.</p><pre><code class="language-julia hljs">for (label, v) in ((&quot;mash&quot;, &quot;mashtun&quot;), (&quot;rested&quot;, &quot;mashtun&quot;), (&quot;kettle&quot;, &quot;kettle&quot;),
                    (&quot;wort&quot;, &quot;kettle&quot;), (&quot;chilled&quot;, &quot;kettle&quot;), (&quot;fermentor&quot;, &quot;fermentor&quot;),
                    (&quot;beer&quot;, &quot;fermentor&quot;))
     press!(app, &quot;as&quot;); answer!(app, &quot;$label $v&quot;)
@@ -114,13 +114,13 @@ screen(app; height = 40)</code></pre><pre class="documenter-example-output"><cod
 
 
 Connect :fermentor =&gt; :beer with a Ferment
-↓↑ move  Tab arrows  Enter inspect  e edit  u undo  U redo  ? help  q quit</code></pre><p>The batch brews, chilled to 20 °C before the fermentor: with no sparge, 16 L of water give a small, strong wort, which the next section fixes. The <code>⚠</code> on the mash is a warning of its mash pH: crystal malt was given no distilled water pH (the inspector, <code>Enter</code>, says so).</p><h2 id="Editing,-and-undo"><a class="docs-heading-anchor" href="#Editing,-and-undo">Editing, and undo</a><a id="Editing,-and-undo-1"></a><a class="docs-heading-anchor-permalink" href="#Editing,-and-undo" title="Permalink"></a></h2><p><code>e</code> edits the item of the cursor; on water, it asks what to edit, and we take more water:</p><pre><code class="language-julia hljs">select!(app.session, NodeRef(:strike_water))
+ ↓↑  move   Tab  arrows   Enter  inspect   e  edit   u  undo   U  redo   ?  help   q  quit</code></pre><p>The batch brews, chilled to 20 °C before the fermentor: with no sparge, 16 L of water give a small, strong wort, which the next section fixes. The <code>⚠</code> on the mash is a warning of its mash pH: crystal malt was given no distilled water pH (the inspector, <code>Enter</code>, says so).</p><h2 id="Editing,-and-undo"><a class="docs-heading-anchor" href="#Editing,-and-undo">Editing, and undo</a><a id="Editing,-and-undo-1"></a><a class="docs-heading-anchor-permalink" href="#Editing,-and-undo" title="Permalink"></a></h2><p><code>e</code> edits the item of the cursor; on water, it asks what to edit, and we take more water:</p><pre><code class="language-julia hljs">select!(app.session, NodeRef(:strike_water))
 press!(app, &quot;e&quot;)
 screen(app; height = 5)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">new quiver ●  │  brewed  │  undo: Connect :fermentor =&gt; :beer with a Ferment
 │  ───  ────────────  ────────────────────────  ───────────                                        │
 │  ▶    strike_water     16.0 L                 → mash                                             │
 Edit :strike_water
-1: volume  2: temperature  3: water profile  Esc: cancel</code></pre><pre><code class="language-julia hljs">press!(app, &quot;1&quot;); answer!(app, &quot;24 L&quot;)
+ 1  volume   2  temperature   3  water profile   Esc  cancel</code></pre><pre><code class="language-julia hljs">press!(app, &quot;1&quot;); answer!(app, &quot;24 L&quot;)
 screen(app; height = 34)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">new quiver ●  │  brewed  │  undo: Set :strike_water to 24 L
 ╭──── lots ────────────────────────────────────────────────────────────────────────────────────────╮
 │       Lot           Contents                  Next                                               │
@@ -154,7 +154,7 @@ screen(app; height = 34)</code></pre><pre class="documenter-example-output"><cod
 
 
 Set :strike_water to 24 L
-↓↑ move  Tab arrows  Enter inspect  e edit  u undo  U redo  ? help  q quit</code></pre><p>The nodes that changed are marked <code>✱</code>, and the status bar tells what <code>u</code> would undo. On an arrow, <code>e</code> offers its kind and its fields, e.g. the time of the boil:</p><pre><code class="language-julia hljs">select!(app.session, ArrowRef(:kettle, :wort))
+ ↓↑  move   Tab  arrows   Enter  inspect   e  edit   u  undo   U  redo   ?  help   q  quit</code></pre><p>The nodes that changed are marked <code>✱</code>, and the status bar tells what <code>u</code> would undo. On an arrow, <code>e</code> offers its kind and its fields, e.g. the time of the boil:</p><pre><code class="language-julia hljs">select!(app.session, ArrowRef(:kettle, :wort))
 press!(app, &quot;e1&quot;); answer!(app, &quot;70 min&quot;)
 press!(app, &quot;u&quot;)
 app.message</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">&quot;undid Set the time of :kettle =&gt; :wort to 70 minute&quot;</code></pre><p>Every edit can be undone (<code>u</code>) and redone (<code>U</code>); <code>h</code> shows the history:</p><pre><code class="language-julia hljs">press!(app, &quot;h&quot;)
@@ -187,7 +187,7 @@ screen(app; height = 30)</code></pre><pre class="documenter-example-output"><cod
 │    Set the time of :kettle =&gt; :wort to 70 minute                                                 │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
 
-↓↑ scroll  u undo  U redo  any other key: back</code></pre><pre><code class="language-julia hljs">press!(app, &quot;\e&quot;)   # back</code></pre><h2 id="Inspecting"><a class="docs-heading-anchor" href="#Inspecting">Inspecting</a><a id="Inspecting-1"></a><a class="docs-heading-anchor-permalink" href="#Inspecting" title="Permalink"></a></h2><p><code>Enter</code> shows the node of the cursor in detail:</p><pre><code class="language-julia hljs">select!(app.session, NodeRef(:kettle))
+ ↓↑  scroll   u  undo   U  redo   Esc  back</code></pre><pre><code class="language-julia hljs">press!(app, &quot;\e&quot;)   # back</code></pre><h2 id="Inspecting"><a class="docs-heading-anchor" href="#Inspecting">Inspecting</a><a id="Inspecting-1"></a><a class="docs-heading-anchor-permalink" href="#Inspecting" title="Permalink"></a></h2><p><code>Enter</code> shows the node of the cursor in detail:</p><pre><code class="language-julia hljs">select!(app.session, NodeRef(:kettle))
 press!(app, &quot;\r&quot;)
 screen(app; height = 32)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">new quiver ●  │  brewed  │  undo: Set :strike_water to 24 L
 ╭──── :kettle  in the kettle ──────────────────────────────────────────────────────────────────────╮
@@ -220,7 +220,7 @@ screen(app; height = 32)</code></pre><pre class="documenter-example-output"><cod
 
 
 
-↓↑ scroll  j k move  Tab arrows  e edit  u undo  U redo  Esc back  ? help</code></pre><p><code>Tab</code> moves the cursor to the arrows leaving the node, and <code>Esc</code> goes back.</p><h2 id="The-drawing,-the-timeline,-and-solving"><a class="docs-heading-anchor" href="#The-drawing,-the-timeline,-and-solving">The drawing, the timeline, and solving</a><a id="The-drawing,-the-timeline,-and-solving-1"></a><a class="docs-heading-anchor-permalink" href="#The-drawing,-the-timeline,-and-solving" title="Permalink"></a></h2><p><code>d</code> draws the quiver, around the cursor:</p><pre><code class="language-julia hljs">press!(app, &quot;\e&quot;)
+ ↓↑  scroll   j k  move   Tab  arrows   e  edit   u  undo   U  redo   Esc  back   ?  help</code></pre><p><code>Tab</code> moves the cursor to the arrows leaving the node, and <code>Esc</code> goes back.</p><h2 id="The-drawing,-the-timeline,-and-solving"><a class="docs-heading-anchor" href="#The-drawing,-the-timeline,-and-solving">The drawing, the timeline, and solving</a><a id="The-drawing,-the-timeline,-and-solving-1"></a><a class="docs-heading-anchor-permalink" href="#The-drawing,-the-timeline,-and-solving" title="Permalink"></a></h2><p><code>d</code> draws the quiver, around the cursor:</p><pre><code class="language-julia hljs">press!(app, &quot;\e&quot;)
 select!(app.session, NodeRef(:strike_water))
 press!(app, &quot;d&quot;)
 screen(app; height = 12)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">new quiver ●  │  brewed  │  undo: Set :strike_water to 24 L
@@ -234,7 +234,7 @@ screen(app; height = 12)</code></pre><pre class="documenter-example-output"><cod
 
 
 
-↓↑ j k move  Tab arrows  Enter inspect  l arrange  d overview  e edit  u undo  ? help</code></pre><p><code>t</code> shows when each vessel is busy; <code>+</code> zooms on the brew day:</p><pre><code class="language-julia hljs">press!(app, &quot;\et++++&quot;)
+ ↓↑  move   Tab  arrows   Enter  inspect   l  arrange   d  overview   e  edit   u  undo   ?  help</code></pre><p><code>t</code> shows when each vessel is busy; <code>+</code> zooms on the brew day:</p><pre><code class="language-julia hljs">press!(app, &quot;\et++++&quot;)
 screen(app; height = 12)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">new quiver ●  │  brewed  │  undo: Set :strike_water to 24 L
 ╭──── timeline  14.1 d in all  zoom ×16 ───────────────────────────────────────────────────────────╮
 │             0:00                                                                          21:08  │
@@ -246,7 +246,7 @@ screen(app; height = 12)</code></pre><pre class="documenter-example-output"><cod
 │  Node          Vessel     Filled    Ready     Emptied                                            │
 │  ────────────  ─────────  ────────  ────────  ────────                                           │
 
-+ - zoom  ↓↑ scroll  any other key: back</code></pre><p><code>T</code> solves for targets: here the original gravity, by the amount of the malts, kept in their proportions:</p><pre><code class="language-julia hljs">press!(app, &quot;\eT&quot;)
+ + -  zoom   ↓↑  scroll   Esc  back</code></pre><p><code>T</code> solves for targets: here the original gravity, by the amount of the malts, kept in their proportions:</p><pre><code class="language-julia hljs">press!(app, &quot;\eT&quot;)
 answer!(app, &quot;beer og 1.048 sg vary pale crystal&quot;)
 screen(app; height = 16)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">new quiver ●  │  brewed  │  undo: Solve for the original_gravity of :beer
 ╭──── solution ────────────────────────────────────────────────────────────────────────────────────╮
@@ -263,8 +263,8 @@ screen(app; height = 16)</code></pre><pre class="documenter-example-output"><cod
 
 
 Solve for the original_gravity of :beer
-any key: back (u undoes the solve)</code></pre><h2 id="Saving"><a class="docs-heading-anchor" href="#Saving">Saving</a><a id="Saving-1"></a><a class="docs-heading-anchor-permalink" href="#Saving" title="Permalink"></a></h2><p><code>s</code> saves (asking for a path the first time), and <code>q</code> quits, asking first if there are unsaved changes:</p><pre><code class="language-julia hljs">press!(app, &quot;\eS&quot;); answer!(app, joinpath(mktempdir(), &quot;bitter.quiver.json&quot;))
+ u  undo the solve   Esc  back</code></pre><h2 id="Saving"><a class="docs-heading-anchor" href="#Saving">Saving</a><a id="Saving-1"></a><a class="docs-heading-anchor-permalink" href="#Saving" title="Permalink"></a></h2><p><code>s</code> saves (asking for a path the first time), and <code>q</code> quits, asking first if there are unsaved changes:</p><pre><code class="language-julia hljs">press!(app, &quot;\eS&quot;); answer!(app, joinpath(mktempdir(), &quot;bitter.quiver.json&quot;))
 screen(app; height = 3)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">bitter.quiver.json  │  brewed  │  undo: Solve for the original_gravity of :beer
 │  ▶    strike_water     24.0 L                 → mash                                             │
 saved bitter.quiver.json
-↓↑ move  Tab arrows  Enter inspect  e edit  u undo  U redo  ? help  q quit</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><a class="docs-footer-nextpage" href="../views/">Views »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.20.0 on <span class="colophon-date" title="Saturday 21 November 2026 03:31">Saturday 21 November 2026</span>. Using Julia version 1.13.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+ ↓↑  move   Tab  arrows   Enter  inspect   e  edit   u  undo   U  redo   ?  help   q  quit</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><a class="docs-footer-nextpage" href="../views/">Views »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.20.0 on <span class="colophon-date" title="Saturday 21 November 2026 14:06">Saturday 21 November 2026</span>. Using Julia version 1.13.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
