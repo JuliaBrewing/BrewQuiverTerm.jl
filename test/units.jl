@@ -61,6 +61,24 @@
         @test equipment(quiver(app.session), :kettle).capacity ≈ 10u"gal"
     end
 
+    @testset "Temperatures typed with C and F" begin
+        app = App(Session(single_batch()))
+        select!(app.session, NodeRef(:strike_water))
+        for (text, t) in ("180F" => 180u"°F", "70 C" => 70u"°C", "72c" => 72u"°C", "160 °F" => 160u"°F")
+            keys!(app, 'e', '2'); say!(app, text)
+            @test ok(app) && liquor(quiver(app.session)[:strike_water].initial).temperature ≈ t
+        end
+        # a value of another kind is refused, not a crash
+        for text in ("70 m", "true", "")
+            keys!(app, 'e', '2'); say!(app, text)
+            @test app.iserror && app.mode isa Browse
+        end
+        keys!(app, 'e', '1'); say!(app, "")
+        @test app.iserror && occursin("an amount is", app.message)
+        select!(app.session, ArrowRef(:kettle, :wort)); keys!(app, 'e', '4'); say!(app, "80C")
+        @test ok(app) && quiver(app.session)[:kettle => :wort, 1].stand_temperature ≈ 80u"°C"
+    end
+
     @testset "Chosen with P, and saved" begin
         mktempdir() do dir
             withenv("XDG_CONFIG_HOME" => dir) do

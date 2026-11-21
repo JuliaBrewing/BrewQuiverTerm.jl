@@ -91,7 +91,7 @@ function attempt(f, app)
     catch e
         e isa InterruptException && rethrow()
         e isa Union{CommandError, ArgumentError, DomainError, SystemError, Base.IOError,
-                    ErrorException} || rethrow()
+                    ErrorException, Unitful.DimensionError} || rethrow()
         error!(app, _error_message(e))
     end
     return app
