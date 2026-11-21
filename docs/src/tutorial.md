@@ -9,7 +9,7 @@ The screens below are those of the app itself, drawn while this page was built: 
 are given to it as you would type them.
 
 ```@setup tut
-using BrewQuiverTerm, BrewQuiverUICore, BrewQuiver, Unitful, UnitfulBrewing
+using BrewQuiverTerm, BrewQuiver, Unitful, UnitfulBrewing
 screen(app; width = 100, height = 24) =
     println(join(rstrip.(split(render_text(render_app(app; width, height)), '\n')), '\n'))
 # press keys: characters, and \r for Enter

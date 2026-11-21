@@ -24,7 +24,7 @@ The rendering functions are pure: they take a session of BrewQuiverUICore and re
 renderables, so they are tested without a terminal.
 
 ```julia
-using BrewQuiverUICore, BrewQuiverTerm
+using BrewQuiverTerm     # (with the API of BrewQuiverUICore: sessions, commands, ...)
 
 s = open_session("bitter.quiver.json")
 print(render_overview(s; width = 110))     # a panel per vessel, with the results of its nodes

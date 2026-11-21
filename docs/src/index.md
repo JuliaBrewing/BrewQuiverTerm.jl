@@ -38,7 +38,7 @@ Press `?` for the keys, `q` to quit.
 ## A screen
 
 ```@setup home
-using BrewQuiverTerm, BrewQuiverUICore, BrewQuiver, Unitful, UnitfulBrewing
+using BrewQuiverTerm, BrewQuiver, Unitful, UnitfulBrewing
 include(joinpath(pkgdir(BrewQuiverTerm), "docs", "quivers.jl"))
 screen(app; width = 100, height = 30) =
     println(join(rstrip.(split(render_text(render_app(app; width, height)), '\n')), '\n'))

@@ -51,8 +51,8 @@ using BrewQuiverTerm: clock
         # a vessel booked twice
         q = partigyle()
         q[:kettle2] = Contents()
-        BrewQuiverUICore.perform!(q, SetVessel(:kettle2, :kettle1))
-        BrewQuiverUICore.perform!(q, SetVessel(:wort2, :kettle1))
+        vessel!(q, :kettle2, :kettle1)
+        vessel!(q, :wort2, :kettle1)
         s2 = Session(q)
         @test !isempty(vessel_bookings(s2).overlaps)
         @test occursin("the kettle1 holds", render_text(render_timeline(s2)))

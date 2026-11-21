@@ -38,4 +38,10 @@ export App, Mode, Browse, Inspect, Help, Prompt, Confirm, HistoryView, DagView, 
     SolutionView, InventoryView, handle!, decode_keys, render_app,
     open_file
 
+# the API of BrewQuiverUICore (sessions, commands, undo and redo, view data, units, ...),
+# so that `using BrewQuiverTerm` is enough to script the app as well as to run it
+for name in names(BrewQuiverUICore)
+    name === :BrewQuiverUICore || @eval export $name
+end
+
 end # module
