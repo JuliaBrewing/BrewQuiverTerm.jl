@@ -29,6 +29,8 @@ using BrewQuiverTerm: clock
         p = render_text(render_dag(Session(partigyle()); cell = 12))
         @test occursin("kettle1", p) && occursin("strong", p) && occursin("light", p)
         @test occursin("empty quiver", render_text(render_dag(Session(Quiver()))))
+        select!(s, NodeRef(:kettle))                               # in reverse video
+        @test occursin("\e[7mkettle\e[27m", string(render_dag(s)))
     end
 
     @testset "Timeline" begin
@@ -94,7 +96,7 @@ using BrewQuiverTerm: clock
         handle!(app, :left)
         @test current(app) == NodeRef(:crystal)
         f = render_text(render_app(app; width = 100, height = 20))
-        @test occursin("── quiver ─", f) && occursin("l arrange", f)
+        @test occursin("── quiver ─", f) && occursin(r"l\s+arrange", f)
         handle!(app, 'l')
         @test undo_description(app.session) == "Arrange the nodes" && app.message == "arranged the nodes"
         handle!(app, :enter)
@@ -118,9 +120,8 @@ using BrewQuiverTerm: clock
         @test app.mode isa SolutionView && app.message == "Solve for the gravity of :fermentor"
         @test gravity(result(app.session)[:fermentor]) ≈ 1.048u"sg"
         @test occursin("converged", render_text(render_app(app; width = 100, height = 24)))
-        handle!(app, 'x')
+        handle!(app, 'u')                                      # undoes the solve, and goes back
         @test app.mode isa Browse
-        handle!(app, 'u')
         @test !(gravity(result(app.session)[:fermentor]) ≈ 1.048u"sg")
         handle!(app, 'T'); answer!(app, "fermentor gravity 1.048 sg")
         @test app.iserror && occursin("vary", app.message) && app.mode isa Browse

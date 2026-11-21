@@ -49,16 +49,35 @@ const HELP = """
   q  Ctrl-C       quit (asks about unsaved changes)
 """
 
-hints(::Browse) = "↓↑ move  Tab arrows  Enter inspect  e edit  u undo  U redo  ? help  q quit"
-hints(::Inspect) = "↓↑ scroll  j k move  Tab arrows  e edit  u undo  U redo  Esc back  ? help"
-hints(::DagView) = "↓↑ j k move  Tab arrows  Enter inspect  l arrange  d overview  e edit  u undo  ? help"
-hints(::TimelineView) = "+ - zoom  ↓↑ scroll  any other key: back"
-hints(::InventoryView) = "C take from the stock  W write the library  ↓↑ scroll  any other key: back"
-hints(::SolutionView) = "any key: back (u undoes the solve)"
-hints(::HistoryView) = "↓↑ scroll  u undo  U redo  any other key: back"
-hints(::Help) = "↓↑ scroll  any other key: back"
-hints(::Prompt) = "Enter: ok  Esc: cancel"
-hints(c::Confirm) = join(("$k: $label" for (k, (label, _)) in c.choices), "  ") * "  Esc: cancel"
+# the keys of a mode, as `key => what it does`
+hints(::Browse) = ["↓↑" => "move", "Tab" => "arrows", "Enter" => "inspect", "e" => "edit", "u" => "undo",
+                   "U" => "redo", "?" => "help", "q" => "quit"]
+hints(::Inspect) = ["↓↑" => "scroll", "j k" => "move", "Tab" => "arrows", "e" => "edit", "u" => "undo",
+                    "U" => "redo", "Esc" => "back", "?" => "help"]
+hints(::DagView) = ["↓↑" => "move", "Tab" => "arrows", "Enter" => "inspect", "l" => "arrange",
+                    "d" => "overview", "e" => "edit", "u" => "undo", "?" => "help"]
+hints(::TimelineView) = ["+ -" => "zoom", "↓↑" => "scroll", "Esc" => "back"]
+hints(::InventoryView) = ["C" => "take from the stock", "W" => "write the library", "↓↑" => "scroll",
+                          "Esc" => "back"]
+hints(::SolutionView) = ["u" => "undo the solve", "Esc" => "back"]
+hints(::HistoryView) = ["↓↑" => "scroll", "u" => "undo", "U" => "redo", "Esc" => "back"]
+hints(::Help) = ["↓↑" => "scroll", "Esc" => "back"]
+hints(::Prompt) = ["Enter" => "ok", "Esc" => "cancel"]
+hints(c::Confirm) = [[string(k) => label for (k, (label, _)) in c.choices]; "Esc" => "cancel"]
+
+# a key, as a key cap: in reverse video
+keycap(k) = styled(" " * plain(k) * " ", "inverse")
+
+# the keys of a mode in a line: each key cap, then what it does; on a narrow screen, the
+# hints before the last are dropped until they fit
+function hints_text(hints; width = nothing)
+    hs = collect(hints)
+    text(hs) = join((keycap(k) * " " * plain(what) for (k, what) in hs), "  ")
+    while width !== nothing && length(hs) > 1 && textwidth_shown(text(hs)) > width
+        deleteat!(hs, length(hs) - 1)
+    end
+    return text(hs)
+end
 
 # the lines of the main view of a mode
 main_lines(app::App, ::Browse, width) = _lines(render_overview(app.session; width))
@@ -114,6 +133,6 @@ function render_app(app::App; width::Integer = 100, height::Integer = 30)
     append!(shown, fill("", h - length(shown)))
     status = string(render_statusbar(app.session; width))
     msg = string(RenderableText(message_line(app, app.mode); width))
-    keys = string(RenderableText(styled(hints(app.mode), DIM); width))
+    keys = string(RenderableText(hints_text(hints(app.mode); width); width))
     return join([first(split(status, '\n')); shown; first(split(msg, '\n')); first(split(keys, '\n'))], '\n')
 end
