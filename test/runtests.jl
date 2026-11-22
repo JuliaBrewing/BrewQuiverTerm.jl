@@ -39,7 +39,7 @@ end
     ls = lines(o)
     @test all(textwidth(l) == 110 for l in ls if !isempty(l))
     text = render_text(o)
-    for title in ("lots", "mashtun", "kettle", "fermentor", "bottles")
+    for title in ("ingredients", "mashtun", "kettle", "fermentor", "bottles")
         @test occursin("── $title ─", text)
     end
     @test occursin(r"4\.50 kg\s+██ Pale ale malt", text) && occursin("→ mash", text)

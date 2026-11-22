@@ -38,7 +38,9 @@ end
 
 A line of text to type, for `question`, starting with `buffer`: Enter calls
 `submit(app, text)`, Esc goes `back`. With a `cell` (`(node, column)`), it is typed in
-place, in that cell of the overview.
+place, in that cell of the overview. With `complete` (a function of the text, giving the
+text before what is completed and the completions), Tab completes the text, again for the
+next completion.
 """
 mutable struct Prompt <: Mode
     question::String
@@ -46,8 +48,12 @@ mutable struct Prompt <: Mode
     submit::Function
     back::Mode
     cell::Union{Nothing, Tuple{Symbol, Symbol}}
+    complete::Union{Nothing, Function}
+    # the text being completed by Tab, and the completion shown
+    completing::Union{Nothing, Tuple{String, Vector{String}, Int}}
 end
-Prompt(question, buffer, submit, back) = Prompt(question, buffer, submit, back, nothing)
+Prompt(question, buffer, submit, back, cell = nothing) =
+    Prompt(question, buffer, submit, back, cell, nothing, nothing)
 
 """
     Confirm(question, choices, back)
@@ -170,15 +176,37 @@ end
 
 function load!(app::App, path::AbstractString)
     s = open_file(path)
+    _replace_session!(app, s)
+    info!(app, filepath(s) === nothing ? "imported $(basename(path)): save it as a quiver" :
+                                         "opened $(basename(path))")
+    return app
+end
+
+# edit the session `s` instead, keeping the library and the units
+function _replace_session!(app::App, s)
     set_library!(s, library(app.session))             # (the library stays loaded)
     set_units!(s, units(app.session))                 # (and so do the units)
     app.session = s
     app.mode = Browse()
     app.scroll = 0
+    app.column = nothing
     _select_first!(app)
-    info!(app, filepath(s) === nothing ? "imported $(basename(path)): save it as a quiver" :
-                                         "opened $(basename(path))")
     return app
+end
+
+# `a t`: a new quiver from a template (asking first about unsaved changes, unless the quiver
+# is empty)
+function pick_template!(app::App)
+    app.mode = Picker("Start from a template", first.(TEMPLATES); tags = Dict(TEMPLATES),
+                      submit = start_template!, back = app.mode)
+    return app
+end
+
+function start_template!(app::App, name)
+    start(app) = (_replace_session!(app, Session(template(name)));
+                  info!(app, "a new $name: change its ingredients and amounts (Tab to a cell, e)"))
+    isempty(nodes(quiver(app.session))) && return start(app)
+    return unless_unsaved(start, app, "Start a new quiver?")
 end
 
 function save_file!(app::App)
@@ -236,6 +264,25 @@ message of the app.
 """
 handle!(app::App, key) = (app.message = ""; app.iserror = false; handle!(app, app.mode, key); app)
 
+# Tab in a prompt: the next completion of the text typed
+function complete!(p::Prompt)
+    p.complete === nothing && return p
+    if p.completing === nothing
+        prefix, cs = p.complete(p.buffer)
+        isempty(cs) && return p
+        p.completing = (prefix, cs, 0)
+    end
+    prefix, cs, i = p.completing
+    i = mod1(i + 1, length(cs))
+    p.completing = (prefix, cs, i)
+    p.buffer = prefix * cs[i]
+    return p
+end
+
+# the completions of what is typed in a prompt, if any
+completions(p::Prompt) = p.complete === nothing ? String[] :
+    p.completing !== nothing ? p.completing[2] : last(p.complete(p.buffer))
+
 # keys common to browsing and inspecting
 function _common!(app::App, key)
     if key in ('j',)
@@ -277,7 +324,11 @@ function handle!(app::App, ::Browse, key)
         move!(app, -typemax(Int) ÷ 2)
     elseif key in (:end, 'G')
         move!(app, typemax(Int) ÷ 2)
-    elseif key in (:enter, 'i', :right)
+    elseif key === :right
+        cycle!(app, 1)
+    elseif key === :left
+        cycle!(app, -1)
+    elseif key in (:enter, 'i')
         current(app) === nothing || (app.mode = Inspect(); app.scroll = 0)
     elseif key === ' '
         explain_cell!(app)
@@ -302,6 +353,8 @@ function handle!(app::App, ::Inspect, key)
     elseif key in (:esc, 'q', :left)
         app.mode = Browse()
         app.scroll = 0
+    elseif key === :right
+        cycle!(app, 1)
     end
     return app
 end
@@ -319,7 +372,10 @@ function handle!(app::App, h::Help, key)
 end
 
 function handle!(app::App, p::Prompt, key)
-    if key === :enter
+    key === :tab || (p.completing = nothing)
+    if key === :tab
+        complete!(p)
+    elseif key === :enter
         app.mode = p.back
         attempt(() -> p.submit(app, strip(p.buffer)), app)
     elseif key === :esc

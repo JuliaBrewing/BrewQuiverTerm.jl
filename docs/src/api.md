@@ -46,4 +46,5 @@ TimelineView
 SolutionView
 InventoryView
 Picker
+render_picker
 ```
