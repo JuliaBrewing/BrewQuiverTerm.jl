@@ -251,7 +251,7 @@ screen(app; height = 32)</code></pre><pre class="documenter-example-output"><cod
 
 
  ↓↑  scroll   j k  move   Tab  arrows   Enter e  edit   u  undo   U  redo   Esc  back   ?  help
- a  add   c  connect   x  remove   d  drawing   t  timeline   T  solve   I  inventory   o  open</code></pre><p><code>Tab</code> moves the cursor to the arrows leaving the node (here, in the inspector, there are no columns), and <code>Esc</code> goes back.</p><h2 id="The-drawing,-the-timeline,-and-solving"><a class="docs-heading-anchor" href="#The-drawing,-the-timeline,-and-solving">The drawing, the timeline, and solving</a><a id="The-drawing,-the-timeline,-and-solving-1"></a><a class="docs-heading-anchor-permalink" href="#The-drawing,-the-timeline,-and-solving" title="Permalink"></a></h2><p><code>d</code> draws the quiver, around the cursor:</p><pre><code class="language-julia hljs">press!(app, &quot;\e&quot;)
+ a  add   c  connect   x  remove   d  drawing   t  timeline   T  solve   I  inventory   o  open</code></pre><p><code>Tab</code> moves the cursor to the arrows leaving the node (here, in the inspector, there are no columns), and <code>Esc</code> goes back.</p><h2 id="The-drawing,-the-timeline,-and-solving"><a class="docs-heading-anchor" href="#The-drawing,-the-timeline,-and-solving">The drawing, the timeline, and solving</a><a id="The-drawing,-the-timeline,-and-solving-1"></a><a class="docs-heading-anchor-permalink" href="#The-drawing,-the-timeline,-and-solving" title="Permalink"></a></h2><p><code>d</code> draws the quiver, around the cursor, its stages aligned by vessel:</p><pre><code class="language-julia hljs">press!(app, &quot;\e&quot;)
 select!(app.session, NodeRef(:strike_water))
 press!(app, &quot;d&quot;)
 screen(app; height = 12)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">new quiver ●  │  ok  │  undo: Solve for the ibu of :wort
@@ -264,9 +264,27 @@ screen(app; height = 12)</code></pre><pre class="documenter-example-output"><cod
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
 
 
- ↓↑  move   Tab  arrows   Enter e  edit   i  inspect   l  arrange   d  overview   u  undo   ?  help
+ ↓↑  move   Tab  arrows   Enter e  edit   i  inspect   l  arrange   f  ingredients first   ?  help
+ a  add   c  connect   x  remove   d  drawing   t  timeline   T  solve   I  inventory   o  open</code></pre><p><code>l</code> arranges it with each ingredient next to where it goes (as drawn), <code>f</code> with all the ingredients in the first column:</p><pre><code class="language-julia hljs">press!(app, &quot;f&quot;)
+screen(app; height = 18)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">new quiver ●  │  ok  │  undo: Arrange the nodes
+╭──── quiver ──────────────────────────────────────────────────────────────────────────────────────╮
+│    ○ strike_water─┬▶○ mash──────────▶● rested───────┬▶● kettle────────▶● wort──────────▶● chill  │
+│                   │                                 │                                            │
+│    ● pale─────────┤                                 │                                            │
+│                   │                                 │                                            │
+│    ● crystal──────┘                                 │                                            │
+│                   ┌─────────────────────────────────┘                                            │
+│    ○ cascade──────┘                                                                              │
+│                   ┌────────────────────────────────────────────────────────────────────────────  │
+│    ○ yeast────────┘                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+
+
+arranged the nodes, with the ingredients first
+ ↓↑  move   Tab  arrows   Enter e  edit   i  inspect   l  arrange   f  ingredients first   ?  help
  a  add   c  connect   x  remove   d  drawing   t  timeline   T  solve   I  inventory   o  open</code></pre><p><code>t</code> shows when each vessel is busy; <code>+</code> zooms on the brew day:</p><pre><code class="language-julia hljs">press!(app, &quot;\et++++&quot;)
-screen(app; height = 12)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">new quiver ●  │  ok  │  undo: Solve for the ibu of :wort
+screen(app; height = 12)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">new quiver ●  │  ok  │  undo: Arrange the nodes
 ╭──── timeline  14.1 d in all  zoom ×16 ───────────────────────────────────────────────────────────╮
 │             0:00                                                                          21:08  │
 │  mashtun    ███                                                                                  │
@@ -297,4 +315,4 @@ screen(app; height = 3)</code></pre><pre class="documenter-example-output"><code
 │  ▶    strike_water  24.0 L   water             75.0 °C  → mash                                   │
 saved bitter.quiver.json
  ↓↑  move   ←→ Tab  columns, arrows   Space  what is it   Enter e  edit   i  inspect   q  quit
- a  add   c  connect   x  remove   d  drawing   t  timeline   T  solve   I  inventory   o  open</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><a class="docs-footer-nextpage" href="../views/">Views »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.20.0 on <span class="colophon-date" title="Sunday 22 November 2026 14:55">Sunday 22 November 2026</span>. Using Julia version 1.13.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+ a  add   c  connect   x  remove   d  drawing   t  timeline   T  solve   I  inventory   o  open</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><a class="docs-footer-nextpage" href="../views/">Views »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.20.0 on <span class="colophon-date" title="Sunday 22 November 2026 17:35">Sunday 22 November 2026</span>. Using Julia version 1.13.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
