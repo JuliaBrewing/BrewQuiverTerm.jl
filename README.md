@@ -70,7 +70,7 @@ BrewQuiverTerm.run("bitter.quiver.json")     # a quiver; or a BeerJSON recipe, i
 | `x` `Delete` | remove the node (asking first) or the arrow |
 | `u` `Ctrl-Z`, `U` `Ctrl-Y` | undo, redo (the selection follows) |
 | `h` | the history of the edits |
-| `d` | the drawing of the quiver as a layered graph (`l` arranges the nodes, undoably), or back |
+| `d` | the drawing of the quiver as a layered graph, its stages aligned by vessel (the kettles of a parti-gyle in one column), or back; `l` arranges it with each ingredient next to where it goes, `f` with all the ingredients first (undoably) |
 | `t` | the timeline: a bar per vessel when it is busy, and when each node is filled, ready and emptied (`+` `-` zoom on the brew day) |
 | `T` | solve for targets: `fermentor gravity 1.050 sg, wort ibu 30 IBU vary pale crystal, cascade` (ingredients scaled together, or a field of an arrow: `kettle>wort.time`); the solution is shown, and `u` undoes it |
 | `M` | the models of BrewingFormulas the brew uses: bitterness, color, ABV, gravity (undoable) |

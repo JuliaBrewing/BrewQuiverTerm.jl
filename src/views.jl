@@ -4,7 +4,8 @@
     DagView()
 
 The drawing of the quiver (see [`render_dag`](@ref)): the keys move the selection as in the
-overview; `l` arranges the nodes (the layout of BrewQuiverUICore, undoable).
+overview; `l` arranges the nodes (the layout of BrewQuiverUICore, aligned by vessel, undoable)
+with each ingredient just before where it goes, `f` with all the ingredients first.
 """
 struct DagView <: Mode end
 
@@ -64,10 +65,12 @@ function handle!(app::App, ::DagView, key)
         move!(app, 1)
     elseif key in (:up, :left)
         move!(app, -1)
-    elseif key === 'l'
+    elseif key in ('l', 'f')
         attempt(app) do
-            layout!(app.session)
-            info!(app, "arranged the nodes")
+            first = key === 'f'
+            layout!(app.session; sources = first ? :first : :before)
+            info!(app, first ? "arranged the nodes, with the ingredients first" :
+                               "arranged the nodes, with the ingredients next to where they go")
         end
     elseif key === 'i'
         current(app) === nothing || (app.mode = Inspect(); app.scroll = 0)

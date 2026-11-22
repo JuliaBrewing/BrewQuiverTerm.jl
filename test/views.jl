@@ -97,8 +97,13 @@ using BrewQuiverTerm: clock
         @test current(app) == NodeRef(:crystal)
         f = render_text(render_app(app; width = 100, height = 20))
         @test occursin("── quiver ─", f) && occursin(r"l\s+arrange", f)
-        handle!(app, 'l')
-        @test undo_description(app.session) == "Arrange the nodes" && app.message == "arranged the nodes"
+        handle!(app, 'f')                                      # the ingredients first
+        @test undo_description(app.session) == "Arrange the nodes" && occursin("ingredients first", app.message)
+        @test all(positions(app.session)[n][1] == 0 for n in (:pale, :cascade, :yeast, :priming_sugar))
+        handle!(app, 'l')                                      # next to where they go
+        @test occursin("next to where they go", app.message)
+        p = positions(app.session)
+        @test p[:cascade][1] == p[:kettle][1] - 1 && p[:yeast][1] == p[:fermentor][1] - 1
         handle!(app, 'i')
         @test app.mode isa Inspect
         handle!(app, :esc); handle!(app, 'd'); handle!(app, 'd')
