@@ -5,7 +5,8 @@ const ESCAPES = Dict(
     "\e[A" => :up, "\e[B" => :down, "\e[C" => :right, "\e[D" => :left,
     "\eOA" => :up, "\eOB" => :down, "\eOC" => :right, "\eOD" => :left,
     "\e[H" => :home, "\e[F" => :end, "\e[1~" => :home, "\e[4~" => :end,
-    "\e[5~" => :pageup, "\e[6~" => :pagedown, "\e[3~" => :delete, "\e[Z" => :backtab)
+    "\e[5~" => :pageup, "\e[6~" => :pagedown, "\e[3~" => :delete, "\e[Z" => :backtab,
+    "\e[1;2A" => :shift_up, "\e[1;2B" => :shift_down, "\e[a" => :shift_up, "\e[b" => :shift_down)
 
 const CONTROLS = Dict('\r' => :enter, '\n' => :enter, '\t' => :tab, '\x7f' => :backspace,
                       '\b' => :backspace, '\x03' => :ctrl_c, '\x13' => :ctrl_s,
@@ -16,7 +17,7 @@ const CONTROLS = Dict('\r' => :enter, '\n' => :enter, '\t' => :tab, '\x7f' => :b
 
 The keys typed in `input`, as read from a terminal in raw mode: printable characters as
 `Char`s, the others as `Symbol`s (`:up`, `:down`, `:left`, `:right`, `:enter`, `:esc`,
-`:tab`, `:backtab`, `:backspace`, `:delete`, `:home`, `:end`, `:pageup`, `:pagedown`,
+`:shift_up`, `:shift_down`, `:tab`, `:backtab`, `:backspace`, `:delete`, `:home`, `:end`, `:pageup`, `:pagedown`,
 `:ctrl_c`, `:ctrl_s`, `:ctrl_y`, `:ctrl_z`, `:ctrl_o`). Unknown sequences are dropped.
 """
 function decode_keys(input::AbstractString)

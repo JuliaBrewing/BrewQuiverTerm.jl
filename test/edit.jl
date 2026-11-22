@@ -3,7 +3,18 @@
 # answer the open prompt with `text`, replacing what it proposes
 answer!(app, text) = (app.mode.buffer = ""; type!(app, text); handle!(app, :enter))
 amount(s, label) = only(solids(quiver(s)[label].initial)).amount
-goto!(app, label) = select!(app.session, NodeRef(label))
+goto!(app, label) = (select!(app.session, NodeRef(label)); app.column = nothing; app)
+# Tab past the columns of the row, to the `i`th arrow leaving the node
+function arrow!(app, i = 1)
+    handle!(app, :tab)
+    while !(current(app) isa ArrowRef)
+        handle!(app, :tab)
+    end
+    for _ in 2:i
+        handle!(app, :tab)
+    end
+    return app
+end
 
 @testset "Editing" begin
     @testset "Amounts of lots" begin
@@ -36,7 +47,7 @@ goto!(app, label) = select!(app.session, NodeRef(label))
 
     @testset "Fields of arrows" begin
         app = App(Session(single_batch()))
-        goto!(app, :kettle); handle!(app, :tab)
+        goto!(app, :kettle); arrow!(app)
         @test current(app) == ArrowRef(:kettle, :wort, 1)
         handle!(app, 'e')
         @test app.mode isa Confirm && occursin("Boil", app.mode.question)
@@ -47,21 +58,21 @@ goto!(app, label) = select!(app.session, NodeRef(label))
         @test quiver(app.session)[:kettle => :wort, 1].time ≈ 70u"minute"
         @test app.message == "Set the time of :kettle => :wort to 70 minute"
         # a fraction, shown and typed as a percentage
-        goto!(app, :mash); handle!(app, :tab); handle!(app, 'e'); handle!(app, '3')
+        goto!(app, :mash); arrow!(app); handle!(app, 'e'); handle!(app, '3')
         @test app.mode.buffer == "95.0%"
         answer!(app, "90%")
         @test quiver(app.session)[:mash => :rested, 1].conversion ≈ 0.9
         # a timing, and an optional field left to the vessel
-        goto!(app, :cascade); handle!(app, :tab); handle!(app, :tab); handle!(app, 'e'); handle!(app, '2')
+        goto!(app, :cascade); arrow!(app, 2); handle!(app, 'e'); handle!(app, '2')
         @test app.mode.buffer == "10 min remaining"
         answer!(app, "at 55 min")
         @test quiver(app.session)[:cascade => :kettle, 2].timing == At(55u"minute")
-        goto!(app, :chilled); handle!(app, :tab); handle!(app, 'e'); handle!(app, '1')
+        goto!(app, :chilled); arrow!(app); handle!(app, 'e'); handle!(app, '1')
         @test app.mode.buffer == ""                            # no absorption given
         answer!(app, "0.8 L/kg")
         @test quiver(app.session)[:chilled => :fermentor, 1].absorption ≈ 0.8u"L/kg"
         # refused
-        goto!(app, :kettle); handle!(app, :tab); handle!(app, 'e'); handle!(app, '1'); answer!(app, "3 kg")
+        goto!(app, :kettle); arrow!(app); handle!(app, 'e'); handle!(app, '1'); answer!(app, "3 kg")
         @test app.iserror && occursin("quantity in minute", app.message)
         handle!(app, 'e'); handle!(app, :esc)
         @test app.mode isa Browse
@@ -102,7 +113,7 @@ goto!(app, label) = select!(app.session, NodeRef(label))
         @test haskey(quiver(app.session), :trub) && app.mode isa Browse
         handle!(app, :delete); handle!(app, 'y')
         @test !haskey(quiver(app.session), :trub)
-        goto!(app, :cascade); handle!(app, :tab); handle!(app, 'x')
+        goto!(app, :cascade); arrow!(app); handle!(app, 'x')
         @test length(quiver(app.session)[:cascade => :boiler]) == 1
         @test app.message == "Remove the arrow :cascade => :boiler"
     end

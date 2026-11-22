@@ -6,7 +6,7 @@
     s = Session(single_batch(); units = us)
     @testset "Shown" begin
         o = render_text(render_overview(s; width = 110))
-        @test occursin("9.92 lb Pale ale malt", o) && occursin("1.76 oz Cascade", o)
+        @test occursin(r"9.92 lb\s+██ Pale ale malt", o) && occursin(r"1.76 oz\s+Cascade", o)
         @test occursin("°P", o) && occursin("°F", o) && occursin(" gal", o) && !occursin(" sg", o)
         k = render_text(render_node(s, :kettle; width = 90))
         @test occursin(r"Cascade\s+0.882 oz\s+60 min remaining", k)
@@ -93,7 +93,7 @@
                 @test units(app.session)[:hop] == u"oz" && app.mode isa Browse
                 @test occursin("hops in oz (saved in", app.message)
                 @test load_units() == UnitPreferences(hop = u"oz")
-                @test occursin("oz Cascade", render_text(render_overview(app.session; width = 110)))
+                @test occursin(r"oz\s+Cascade", render_text(render_overview(app.session; width = 110)))
                 # read when the app starts, and kept when another quiver is opened
                 a = BrewQuiverTerm.run(; input = IOBuffer(""), output = IOBuffer(), size = (24, 90))
                 @test units(a.session)[:hop] == u"oz"

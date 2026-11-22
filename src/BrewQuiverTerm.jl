@@ -29,13 +29,14 @@ include("render/timeline.jl")
 include("render/solve.jl")
 include("views.jl")
 include("brewing.jl")
+include("cells.jl")
 include("render/app.jl")
 include("run.jl")
 
 export render_overview, render_node, render_arrow, render_statusbar, render_text
 export render_history, render_inventory, render_dag, render_timeline, render_solution, parse_solve, clock
 export App, Mode, Browse, Inspect, Help, Prompt, Confirm, HistoryView, DagView, TimelineView,
-    SolutionView, InventoryView, handle!, decode_keys, render_app,
+    SolutionView, InventoryView, Picker, handle!, decode_keys, render_app,
     open_file
 
 # the API of BrewQuiverUICore (sessions, commands, undo and redo, view data, units, ...),
