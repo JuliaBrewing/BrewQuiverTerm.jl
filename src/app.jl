@@ -34,17 +34,20 @@ struct Help <: Mode
 end
 
 """
-    Prompt(question, buffer, submit, back)
+    Prompt(question, buffer, submit, back, cell = nothing)
 
 A line of text to type, for `question`, starting with `buffer`: Enter calls
-`submit(app, text)`, Esc goes `back`.
+`submit(app, text)`, Esc goes `back`. With a `cell` (`(node, column)`), it is typed in
+place, in that cell of the overview.
 """
 mutable struct Prompt <: Mode
     question::String
     buffer::String
     submit::Function
     back::Mode
+    cell::Union{Nothing, Tuple{Symbol, Symbol}}
 end
+Prompt(question, buffer, submit, back) = Prompt(question, buffer, submit, back, nothing)
 
 """
     Confirm(question, choices, back)
@@ -63,8 +66,9 @@ end
 
 The state of the interactive app: the `Session` of BrewQuiverUICore being edited
 (whose selection is the cursor of the app), the [`Mode`](@ref), the scroll of the main view,
-the last message, whether to quit, and the file of the library of ingredients. Keys are given to [`handle!`](@ref), frames drawn
-with [`render_app`](@ref).
+the last message, whether to quit, the file of the library of ingredients, and the column of
+the cursor in the overview (`nothing` for the node itself). Keys are given to
+[`handle!`](@ref), frames drawn with [`render_app`](@ref).
 """
 mutable struct App{S <: Session}
     session::S
@@ -75,8 +79,11 @@ mutable struct App{S <: Session}
     quit::Bool
     # the file of the library of ingredients, to save its stock
     library_path::Union{Nothing, String}
+    # the column of the cursor in the overview (see cells.jl), kept when moving between rows
+    column::Union{Nothing, Symbol}
 end
-App(s::Session) = (app = App{typeof(s)}(s, Browse(), 0, "", false, false, nothing); _select_first!(app); app)
+App(s::Session) = (app = App{typeof(s)}(s, Browse(), 0, "", false, false, nothing, nothing);
+                   _select_first!(app); app)
 
 _select_first!(app) =
     (ns = nodes(quiver(app.session)); isempty(ns) || select!(app.session, NodeRef(first(ns))); app)
@@ -133,14 +140,17 @@ function outgoing(app::App, n::Symbol)
     return [ArrowRef(n, d, i) for d in successors(q, n) for i in eachindex(q[n => d])]
 end
 
-# cycle the cursor through the node and the arrows leaving it
+# cycle the cursor through the node, its columns (in the overview) and the arrows leaving it
 function cycle!(app::App, step::Integer)
     n = current_node(app)
     n === nothing && return app
-    refs = ItemRef[NodeRef(n); outgoing(app, n)]
-    i = something(findfirst(==(current(app)), refs), 1)
-    select!(app.session, refs[mod1(i + step, length(refs))])
-    app.scroll = 0
+    stops = Tuple{ItemRef, Union{Nothing, Symbol}}[(NodeRef(n), nothing)]
+    app.mode isa Browse && append!(stops, [(NodeRef(n), c) for c in row_columns(app.session, n)])
+    append!(stops, [(r, nothing) for r in outgoing(app, n)])
+    i = something(findfirst(==((current(app), current_column(app))), stops), 1)
+    r, app.column = stops[mod1(i + step, length(stops))]
+    select!(app.session, r)
+    app.mode isa Browse || (app.scroll = 0)
     return app
 end
 
@@ -269,6 +279,10 @@ function handle!(app::App, ::Browse, key)
         move!(app, typemax(Int) ÷ 2)
     elseif key in (:enter, 'i', :right)
         current(app) === nothing || (app.mode = Inspect(); app.scroll = 0)
+    elseif key === ' '
+        explain_cell!(app)
+    elseif key in (:shift_down, :shift_up)
+        next_ingredient!(app, key === :shift_down ? 1 : -1)
     elseif key === 'q'
         quit!(app)
     end

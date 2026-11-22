@@ -45,4 +45,5 @@ DagView
 TimelineView
 SolutionView
 InventoryView
+Picker
 ```

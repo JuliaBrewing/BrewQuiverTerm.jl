@@ -31,11 +31,15 @@ end
 # `T`: solve for targets
 function solve_prompt!(app::App)
     ask!(app, "Solve (targets vary parameters), e.g. fermentor gravity 1.050 sg vary pale crystal") do app, text
-        cmd = parse_solve(text)
-        sol = apply!(app.session, cmd)
-        app.mode = SolutionView(app.mode, sol)
-        sol.converged ? info!(app, describe(cmd)) : error!(app, describe(cmd) * ": did not converge")
+        solve!(app, parse_solve(text))
     end
+end
+
+# apply a `Solve`, showing its solution
+function solve!(app::App, cmd::Solve)
+    sol = apply!(app.session, cmd)
+    app.mode = SolutionView(app.mode, sol)
+    return sol.converged ? info!(app, describe(cmd)) : error!(app, describe(cmd) * ": did not converge")
 end
 
 # the keys of the views, common to browsing and inspecting; whether `key` was one

@@ -148,6 +148,45 @@ press!(app, "\e")   # back
 nothing # hide
 ```
 
+## Editing in the cells
+
+`Tab` walks the cursor through the columns of the row (then the arrows leaving the node),
+and `e` edits the cell in place. On the ingredient of a lot, it offers those of its kind:
+`↓↑` choose, a letter jumps, `Enter` sets it (`Shift-↓↑` change it at once, without the
+list):
+
+```@example tut
+select!(app.session, NodeRef(:pale))
+press!(app, "\t\te")
+screen(app; height = 12)
+```
+
+```@example tut
+press!(app, "\e")   # (keep the pale malt)
+nothing # hide
+```
+
+`Space` tells what a cell is. The values computed by the brew (volume, gravity, ABV, IBU,
+color) cannot be set, but `e` sets a goal for them, and what to vary to reach it, and solves:
+here 30 IBU in the wort, by the amount of the hops.
+
+```@example tut
+select!(app.session, NodeRef(:wort)); app.column = :ibu
+press!(app, " ")
+app.message
+```
+
+```@example tut
+press!(app, "e"); answer!(app, "30")
+press!(app, "\r")   # (vary what it proposes: the hops upstream)
+screen(app; height = 14)
+```
+
+```@example tut
+press!(app, "\e")   # back
+nothing # hide
+```
+
 ## Inspecting
 
 `Enter` shows the node of the cursor in detail:
@@ -158,7 +197,8 @@ press!(app, "\r")
 screen(app; height = 32)
 ```
 
-`Tab` moves the cursor to the arrows leaving the node, and `Esc` goes back.
+`Tab` moves the cursor to the arrows leaving the node (here, in the inspector, there are no
+columns), and `Esc` goes back.
 
 ## The drawing, the timeline, and solving
 

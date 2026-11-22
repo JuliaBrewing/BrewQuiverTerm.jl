@@ -4,13 +4,14 @@
     render_statusbar(s::Session; width = 100)
 
 One line: the file of the session (or "new quiver") with `●` if it has unsaved changes,
-the state of the brew, the number of warnings, and the step undo would undo.
+the state of the brew (`ok`, `empty` for a quiver without nodes, or why it does not brew), the number of warnings, and the step undo would undo.
 """
 function render_statusbar(s::Session; width::Integer = 100)
     f = filepath(s)
     file = f === nothing ? styled("new quiver", DIM) : plain(basename(f))
     isdirty(s) && (file *= " " * styled("●", CHANGED))
-    st = isbrewed(s) ? styled("brewed", SELECTED) :
+    st = isempty(nodes(quiver(s))) ? styled("empty", DIM) :
+         isbrewed(s) ? styled("ok", SELECTED) :
                        styled("does not brew: " * plain(first(sprint(show, status(s)), 60)), WARNING)
     parts = [file, st]
     isempty(models(s)) ||

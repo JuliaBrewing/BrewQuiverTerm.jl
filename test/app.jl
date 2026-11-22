@@ -1,6 +1,6 @@
 # The interactive app: keys, modes, files, frames and the loop, without a terminal.
 
-using BrewQuiverTerm: current, window
+using BrewQuiverTerm: current, current_column, window
 using Term: RenderableText
 
 type!(app, text) = foreach(k -> handle!(app, k), decode_keys(text))
@@ -36,12 +36,16 @@ end
         # the arrows of a node
         handle!(app, 'g'); type!(app, "jj")
         @test sel(app) == NodeRef(:cascade)
-        handle!(app, :tab)
-        @test sel(app) == ArrowRef(:cascade, :kettle, 1)
+        handle!(app, :tab)                                     # its columns: amount, ingredient, temperature
+        @test sel(app) == NodeRef(:cascade) && current_column(app) === :amount
+        handle!(app, :tab); handle!(app, :tab)
+        @test current_column(app) === :temperature
+        handle!(app, :tab)                                     # then the arrows leaving it
+        @test sel(app) == ArrowRef(:cascade, :kettle, 1) && current_column(app) === nothing
         handle!(app, :tab)
         @test sel(app) == ArrowRef(:cascade, :kettle, 2)
         handle!(app, :tab)
-        @test sel(app) == NodeRef(:cascade)
+        @test sel(app) == NodeRef(:cascade) && current_column(app) === nothing
         handle!(app, :backtab)
         @test sel(app) == ArrowRef(:cascade, :kettle, 2)
         handle!(app, 'j')                                      # from an arrow, to the next node
@@ -161,29 +165,31 @@ end
         f = render_app(app; width = 100, height = 20)
         ls = split(render_text(f), '\n')
         @test length(ls) == 20
-        @test occursin("new quiver ●", ls[1]) && occursin(r"q\s+quit", ls[end])
+        @test occursin("new quiver ●", ls[1]) && occursin(r"q\s+quit", ls[end-1])
+        @test occursin(r"d\s+drawing", ls[end]) && occursin(r"I\s+inventory", ls[end])   # the common keys
         @test any(l -> occursin("▶", l) && occursin("pale", l), ls)
         handle!(app, :end)
         ls = split(render_text(render_app(app; width = 100, height = 20)), '\n')
         @test length(ls) == 20 && any(l -> occursin("▶", l) && occursin("bottles", l), ls)
         handle!(app, :enter)
         ls = split(render_text(render_app(app; width = 100, height = 20)), '\n')
-        @test occursin(":bottles", ls[2]) && occursin(r"Esc\s+back", ls[end])
+        @test occursin(":bottles", ls[2]) && occursin(r"Esc\s+back", ls[end-1])
         handle!(app, '?')
         @test !occursin("this help", render_text(render_app(app; width = 100, height = 30)))
-        for _ in 1:20; handle!(app, :down); end                # scrolled to the end
+        for _ in 1:30; handle!(app, :down); end                # scrolled to the end
         @test occursin("this help", render_text(render_app(app; width = 100, height = 30)))
         @test app.mode isa Help
         handle!(app, :esc); handle!(app, 'S')
         ls = split(render_text(render_app(app; width = 100, height = 20)), '\n')
-        @test occursin("Save as: quiver.quiver.json▏", ls[end-1]) && occursin(r"Esc\s+cancel", ls[end])
+        @test occursin("Save as: quiver.quiver.json▏", ls[end-2]) && occursin(r"Esc\s+cancel", ls[end-1])
+        @test isempty(strip(ls[end]))                           # (no common keys while typing)
         handle!(app, :esc); handle!(app, :ctrl_c)              # (in the inspector, q goes back)
         ls = split(render_text(render_app(app; width = 100, height = 20)), '\n')
-        @test occursin("unsaved changes", ls[end-1]) && occursin(r"s\s+save first", ls[end]) && !occursin(":", ls[end])
+        @test occursin("unsaved changes", ls[end-2]) && occursin(r"s\s+save first", ls[end-1]) && !occursin(":", ls[end-1])
         handle!(app, 'c'); handle!(app, 'o'); handle!(app, 'd')
         type!(app, "/no/such/file"); handle!(app, :enter)
         ls = split(render_text(render_app(app; width = 100, height = 20)), '\n')
-        @test occursin("no file", ls[end-1])
+        @test occursin("no file", ls[end-2])
     end
 
     @testset "Key hints" begin
@@ -200,7 +206,8 @@ end
         @test render_text(RenderableText(hints_text(["q" => "quit", "?" => "help"]); width = 30)) |> rstrip ==
               " q  quit   ?  help"
         f = render_app(App(Session(single_batch())); width = 100, height = 20)
-        @test count("\e[7m", last(split(f, '\n'))) == length(hints(Browse()))
+        f = render_app(App(Session(single_batch())); width = 160, height = 20)
+        @test count("\e[7m", split(f, '\n')[end-1]) == length(hints(Browse()))
         # on a narrow screen, the last hint stays
         t = render_text(RenderableText(hints_text(hints(Browse()); width = 30); width = 30))
         @test occursin("quit", t) && occursin("move", t) && !occursin("redo", t)

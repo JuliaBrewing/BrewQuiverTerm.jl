@@ -42,7 +42,9 @@ end
     for title in ("lots", "mashtun", "kettle", "fermentor", "bottles")
         @test occursin("── $title ─", text)
     end
-    @test occursin("4.50 kg Pale ale malt", text) && occursin("→ mash", text)
+    @test occursin(r"4\.50 kg\s+██ Pale ale malt", text) && occursin("→ mash", text)
+    @test occursin(r"Amount\s+Ingredient\s+Temp\.", text)
+    @test occursin(r"strike_water\s+16\.0 L\s+water\s+", text)
     @test occursin("Boil → wort", text) && occursin("→ grain_bed, kettle", text)
     wort = row(ls, "wort")
     @test occursin("1.0", wort) && occursin(" sg", wort) && occursin("IBU", wort) && occursin("°C", wort)
@@ -106,7 +108,8 @@ end
 @testset "Status bar" begin
     s = Session(single_batch())
     t = render_text(render_statusbar(s; width = 100))
-    @test occursin("new quiver ●", t) && occursin("brewed", t) && !occursin("undo", t)
+    @test occursin("new quiver ●", t) && occursin("│  ok", t) && !occursin("undo", t)
+    @test occursin("empty", render_text(render_statusbar(Session(Quiver()); width = 100)))
     apply!(s, SetAmount(:pale, 4.8u"kg"))
     @test occursin("undo: Set :pale to 4.8 kg", render_text(render_statusbar(s)))
     mktempdir() do dir
@@ -126,5 +129,6 @@ include("views.jl")
 include("build.jl")
 include("brewing.jl")
 include("units.jl")
+include("cells.jl")
 
 end
