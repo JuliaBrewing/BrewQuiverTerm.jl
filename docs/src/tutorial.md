@@ -229,13 +229,21 @@ columns), and `Esc` goes back.
 
 ## The drawing, the timeline, and solving
 
-`d` draws the quiver, around the cursor:
+`d` draws the quiver, around the cursor, its stages aligned by vessel:
 
 ```@example tut
 press!(app, "\e")
 select!(app.session, NodeRef(:strike_water))
 press!(app, "d")
 screen(app; height = 12)
+```
+
+`l` arranges it with each ingredient next to where it goes (as drawn), `f` with all the
+ingredients in the first column:
+
+```@example tut
+press!(app, "f")
+screen(app; height = 18)
 ```
 
 `t` shows when each vessel is busy; `+` zooms on the brew day:

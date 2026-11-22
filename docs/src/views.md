@@ -38,8 +38,9 @@ text(render_arrow(s, ArrowRef(:kettle, :wort); width = 80))
 ## The drawing
 
 [`render_dag`](@ref) draws the quiver as a layered graph, from the positions of
-BrewQuiverUICore: a column per layer, the arrows to the next layer along the row of their
-source, longer ones along the empty rows between, so that they never pass behind a node.
+BrewQuiverUICore: a column per layer (the stages aligned by vessel, so that parallel
+vessels share their columns), the arrows to the next layer along the row of their source,
+longer ones along the empty rows between, so that they never pass behind a node.
 
 ```@example views
 text(render_dag(s))

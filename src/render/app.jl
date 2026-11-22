@@ -40,7 +40,9 @@ const HELP = """
   h               the history of the edits
 
 {bold}Views{/bold}
-  d               the drawing of the quiver (l arranges the nodes), or back to the overview
+  d               the drawing of the quiver, or back to the overview: the stages aligned by
+                  vessel; l arranges them with each ingredient next to where it goes, f with
+                  all the ingredients first (undoable)
   t               the timeline: when each vessel is busy (+ - zoom on the brew day)
   T               solve: targets (node quantity goal), vary, as many parameters:
                   fermentor gravity 1.050 sg, wort ibu 30 IBU vary pale crystal, cascade
@@ -68,7 +70,7 @@ hints(::Browse) = ["↓↑" => "move", "←→ Tab" => "columns, arrows", "Space
                    "Enter e" => "edit", "i" => "inspect", "u" => "undo", "U" => "redo", "?" => "help", "q" => "quit"]
 hints(::Inspect) = ["↓↑" => "scroll", "j k" => "move", "Tab" => "arrows", "Enter e" => "edit", "u" => "undo",
                     "U" => "redo", "Esc" => "back", "?" => "help"]
-hints(::DagView) = ["↓↑" => "move", "Tab" => "arrows", "Enter e" => "edit", "i" => "inspect", "l" => "arrange",
+hints(::DagView) = ["↓↑" => "move", "Tab" => "arrows", "Enter e" => "edit", "i" => "inspect", "l" => "arrange", "f" => "ingredients first",
                     "d" => "overview", "u" => "undo", "?" => "help"]
 hints(::TimelineView) = ["+ -" => "zoom", "↓↑" => "scroll", "Esc" => "back"]
 hints(::InventoryView) = ["C" => "take from the stock", "W" => "write the library", "↓↑" => "scroll",
