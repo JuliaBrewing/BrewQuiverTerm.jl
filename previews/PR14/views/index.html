@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="referrer" content="no-referrer"/><title>Views · BrewQuiverTerm.jl</title><meta name="title" content="Views · BrewQuiverTerm.jl"/><meta property="og:title" content="Views · BrewQuiverTerm.jl"/><meta property="twitter:title" content="Views · BrewQuiverTerm.jl"/><meta name="description" content="Documentation for BrewQuiverTerm.jl."/><meta property="og:description" content="Documentation for BrewQuiverTerm.jl."/><meta property="twitter:description" content="Documentation for BrewQuiverTerm.jl."/><meta property="og:url" content="https://juliabrewing.github.io/BrewQuiverTerm.jl/views/"/><meta property="twitter:url" content="https://juliabrewing.github.io/BrewQuiverTerm.jl/views/"/><link rel="canonical" href="https://juliabrewing.github.io/BrewQuiverTerm.jl/views/"/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.63.2/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../">BrewQuiverTerm.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><a class="tocitem" href="../tutorial/">Tutorial: a batch from scratch</a></li><li class="is-active"><a class="tocitem" href>Views</a><ul class="internal"><li><a class="tocitem" href="#The-overview"><span>The overview</span></a></li><li><a class="tocitem" href="#A-node,-an-arrow"><span>A node, an arrow</span></a></li><li><a class="tocitem" href="#The-drawing"><span>The drawing</span></a></li><li><a class="tocitem" href="#The-timeline"><span>The timeline</span></a></li><li><a class="tocitem" href="#Solutions-and-history"><span>Solutions and history</span></a></li><li><a class="tocitem" href="#The-inventory"><span>The inventory</span></a></li><li><a class="tocitem" href="#The-status-bar"><span>The status bar</span></a></li></ul></li><li><a class="tocitem" href="../keys/">Keys</a></li><li><a class="tocitem" href="../design/">How it is built</a></li><li><a class="tocitem" href="../api/">API reference</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Views</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Views</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/JuliaBrewing/BrewQuiverTerm.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/JuliaBrewing/BrewQuiverTerm.jl/blob/main/docs/src/views.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Views"><a class="docs-heading-anchor" href="#Views">Views</a><a id="Views-1"></a><a class="docs-heading-anchor-permalink" href="#Views" title="Permalink"></a></h1><p>Each view of the app is drawn by a rendering function, which takes a session of BrewQuiverUICore and returns a Term renderable: they can be used on their own, in the REPL or in a notebook, and printed in color.</p><h2 id="The-overview"><a class="docs-heading-anchor" href="#The-overview">The overview</a><a id="The-overview-1"></a><a class="docs-heading-anchor-permalink" href="#The-overview" title="Permalink"></a></h2><p><a href="../api/#BrewQuiverTerm.render_overview"><code>render_overview</code></a>: a panel for the ingredients (the nodes in no vessel) and one for each vessel, in topological order, with the results of each node and the arrows leaving it.</p><pre><code class="language-julia hljs">text(render_overview(s; width = 100))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">╭──── ingredients ─────────────────────────────────────────────────────────────────────────────────╮
+│       Node           Amount   Ingredient        Temp.    Next                                    │
+│  ───  ─────────────  ───────  ────────────────  ───────  ───────────                             │
+│       pale           4.50 kg  ██ Pale ale malt  –        → mash                                  │
+│       crystal        300 g    ██ Crystal 60     –        → mash                                  │
+│       cascade        50 g        Cascade        –        → kettle                                │
+│       yeast          1 ×         US-05          –        → fermentor                             │
+│       strike_water   16.0 L   water             75.0 °C  → mash                                  │
+│       sparge_water   14.0 L   water             80.0 °C  → grain_bed                             │
+│       priming_sugar  130 g    ██ Corn sugar     –        → bottling                              │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭──── mashtun ─────────────────────────────────────────────────────────────────────────────────────╮
+│       Node       Volume  Gravity   ABV   IBU    Color       Temp.    pH    Next                  │
+│  ───  ─────────  ──────  ────────  ────  ─────  ──────────  ───────  ────  ───────────────────   │
+│    ⚠  mash       16.0 L  1.000 sg  0.0%  0 IBU     0.0 SRM  75.0 °C  5.70  MashRest → rested     │
+│       rested     18.3 L  1.073 sg  0.0%  0 IBU  ██ 9.3 SRM  67.0 °C  –     → grain_bed, kettle   │
+│       grain_bed  18.8 L  1.019 sg  0.0%  0 IBU  ██ 3.6 SRM  76.5 °C  –     → kettle              │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭──── kettle ──────────────────────────────────────────────────────────────────────────────────────╮
+│       Node     Volume  Gravity   ABV   IBU     Color       Temp.     pH  Next                    │
+│  ───  ───────  ──────  ────────  ────  ──────  ──────────  ────────  ──  ───────────────         │
+│       kettle   27.5 L  1.046 sg  0.0%  0 IBU   ██ 6.7 SRM  71.7 °C   –   Boil → wort             │
+│       wort     23.5 L  1.053 sg  0.0%  22 IBU  ██ 7.4 SRM  100.0 °C  –   Chill → chilled         │
+│       chilled  23.5 L  1.053 sg  0.0%  22 IBU  ██ 7.4 SRM  19.0 °C   –   → fermentor             │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭──── fermentor ───────────────────────────────────────────────────────────────────────────────────╮
+│       Node       Volume  Gravity   ABV   IBU     Color       Temp.    pH  Next                   │
+│  ───  ─────────  ──────  ────────  ────  ──────  ──────────  ───────  ──  ──────────────         │
+│       fermentor  22.5 L  1.053 sg  0.0%  22 IBU  ██ 7.4 SRM  19.0 °C  –   Ferment → beer         │
+│       beer       22.4 L  1.011 sg  5.6%  22 IBU  ██ 7.5 SRM  19.0 °C  –   → bottling             │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭──── bottles ─────────────────────────────────────────────────────────────────────────────────────╮
+│       Node      Volume  Gravity   ABV   IBU     Color       Temp.    pH  Next                    │
+│  ───  ────────  ──────  ────────  ────  ──────  ──────────  ───────  ──  ───────────────         │
+│       bottling  21.4 L  1.011 sg  5.6%  22 IBU  ██ 7.5 SRM  19.0 °C  –   Prime → bottles         │
+│       bottles   21.5 L  1.011 sg  5.9%  22 IBU  ██ 7.5 SRM  19.0 °C  –   –                       │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────╯</code></pre><h2 id="A-node,-an-arrow"><a class="docs-heading-anchor" href="#A-node,-an-arrow">A node, an arrow</a><a id="A-node,-an-arrow-1"></a><a class="docs-heading-anchor-permalink" href="#A-node,-an-arrow" title="Permalink"></a></h2><p><a href="../api/#BrewQuiverTerm.render_node"><code>render_node</code></a> shows the results of a node, its contents (liquor, solids with their timing, water profile), what is left over, the arrows in and out, the equipment of its vessel and its warnings; <a href="../api/#BrewQuiverTerm.render_arrow"><code>render_arrow</code></a> the fields of an arrow (with those taken from the vessel or the defaults), and what it moved and released.</p><pre><code class="language-julia hljs">text(render_node(s, :grain_bed; width = 80))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">╭──── :grain_bed  in the mashtun ──────────────────────────────────────────────╮
+│  volume            18.8 L                                                    │
+│  gravity           1.019 sg                                                  │
+│  original gravity  1.019 sg                                                  │
+│  ABV               0.0%                                                      │
+│  IBU               0 IBU                                                     │
+│  color             ██ 3.6 SRM                                                │
+│  temperature       76.5 °C                                                   │
+│  carbonation       0.00 vols                                                 │
+│  contents                                                                    │
+│  water        18.20 kg                                                       │
+│  extract      912 g                                                          │
+│  temperature  76.5 °C                                                        │
+│  Solid        Amount   Timing                                                │
+│  ───────────  ───────  ──────                                                │
+│  spent grain  1.12 kg                                                        │
+│  left over                                                                   │
+│  water        4.65 kg                                                        │
+│  extract      233 g                                                          │
+│  temperature  76.5 °C                                                        │
+│  Solid        Amount   Timing                                                │
+│  ───────────  ───────  ──────                                                │
+│  spent grain  1.12 kg                                                        │
+│  from                                                                        │
+│  Transfer ← sparge_water  14.0 L                                             │
+│  Transfer ← rested  4.8 L                                                    │
+│  to                                                                          │
+│  Drain → kettle  14.0 L                                                      │
+╰──────────────────────────────────────────────────────────────────────────────╯</code></pre><pre><code class="language-julia hljs">text(render_arrow(s, ArrowRef(:kettle, :wort); width = 80))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">╭──── Boil  :kettle → :wort ───────────────────────────────────────────────────╮
+│  parameters                                                                  │
+│  time               60 min                                                   │
+│  evaporation        4.0 L/h                                                  │
+│  stand              0 min                                                    │
+│  stand temperature  80.0 °C                                                  │
+│  in the brew                                                                 │
+│  duration    60 min                                                          │
+│  moved       23.5 L, 24.80 kg                                                │
+│  evaporated  3.99 kg                                                         │
+╰──────────────────────────────────────────────────────────────────────────────╯</code></pre><h2 id="The-drawing"><a class="docs-heading-anchor" href="#The-drawing">The drawing</a><a id="The-drawing-1"></a><a class="docs-heading-anchor-permalink" href="#The-drawing" title="Permalink"></a></h2><p><a href="../api/#BrewQuiverTerm.render_dag"><code>render_dag</code></a> draws the quiver as a layered graph, from the positions of BrewQuiverUICore: a column per layer, the arrows to the next layer along the row of their source, longer ones along the empty rows between, so that they never pass behind a node.</p><pre><code class="language-julia hljs">text(render_dag(s))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">  ● pale─────────┬▶○ mash─────────┐ ○ sparge_water─┬▶● grain_bed────┬▶● kettle────────▶● wort──────────▶● chilled──────┬▶● fermentor─────▶● beer─────────┬▶● bottling──────▶● bottles
+                 │                │                ├────────────────┤                                                  │                                 │
+  ● crystal──────┤                └▶● rested───────┘ ○ cascade──────┘                                   ○ yeast────────┘                  ● priming_sug…─┘
+                 │
+  ○ strike_water─┘</code></pre><h2 id="The-timeline"><a class="docs-heading-anchor" href="#The-timeline">The timeline</a><a id="The-timeline-1"></a><a class="docs-heading-anchor-permalink" href="#The-timeline" title="Permalink"></a></h2><p><a href="../api/#BrewQuiverTerm.render_timeline"><code>render_timeline</code></a>: a bar per vessel when it is busy, each node in its color, the vessels booked twice at once, and when each node is filled, ready and emptied; <code>zoom</code> looks at the start (the brew day before a long fermentation).</p><pre><code class="language-julia hljs">text(render_timeline(s; width = 100, zoom = 5))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">╭──── timeline  28.1 d in all  zoom ×32 ───────────────────────────────────────────────────────────╮
+│             0:00                                                                          21:04  │
+│  mashtun    ███                                                                                  │
+│  kettle        ████                                                                              │
+│  fermentor         ████████████████████████████████████████████████████████████████████████████  │
+│  bottles                                                                                         │
+│  no vessel is booked twice at once                                                               │
+│  nodes                                                                                           │
+│  Node           Vessel     Filled    Ready     Emptied                                           │
+│  ─────────────  ─────────  ────────  ────────  ────────                                          │
+│  pale                      0:00      0:00      0:00                                              │
+│  crystal                   0:00      0:00      0:00                                              │
+│  cascade                   0:00      0:00      1:50                                              │
+│  yeast                     0:00      0:00      2:00                                              │
+│  strike_water              0:00      0:00      0:00                                              │
+│  sparge_water              0:00      0:00      1:00                                              │
+│  priming_sugar             0:00      0:00      14d 2:00                                          │
+│  mash           mashtun    0:00      0:00      1:00                                              │
+│  rested         mashtun    1:00      1:00      1:00                                              │
+│  grain_bed      mashtun    1:00      1:00      1:00                                              │
+│  kettle         kettle     1:00      1:00      2:00                                              │
+│  wort           kettle     2:00      2:00      2:00                                              │
+│  chilled        kettle     2:00      2:00      2:00                                              │
+│  fermentor      fermentor  2:00      2:00      14d 2:00                                          │
+│  beer           fermentor  14d 2:00  14d 2:00  14d 2:00                                          │
+│  bottling       bottles    14d 2:00  14d 2:00  28d 2:00                                          │
+│  bottles        bottles    28d 2:00  28d 2:00  –                                                 │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────╯</code></pre><h2 id="Solutions-and-history"><a class="docs-heading-anchor" href="#Solutions-and-history">Solutions and history</a><a id="Solutions-and-history-1"></a><a class="docs-heading-anchor-permalink" href="#Solutions-and-history" title="Permalink"></a></h2><pre><code class="language-julia hljs">sol = apply!(s, parse_solve(&quot;fermentor gravity 1.050 sg, wort ibu 30 IBU vary pale crystal, cascade&quot;))
+text(render_solution(sol; width = 90))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">╭──── solution ──────────────────────────────────────────────────────────────────────────╮
+│  converged in 3 iterations                                                             │
+│  parameters                                                                            │
+│  Parameter                  Value                                                      │
+│  ─────────────────────────  ──────────────────────────────────────────────────────     │
+│  amount of :pale, :crystal  :crystal 282 g Crystal 60, :pale 4.23 kg Pale ale malt     │
+│  amount of :cascade         66 g Cascade                                               │
+│  targets                                                                               │
+│  Node       Quantity  Goal      Reached                                                │
+│  ─────────  ────────  ────────  ────────                                               │
+│  fermentor  gravity   1.050 sg  1.050 sg                                               │
+│  wort       ibu       30 IBU    30 IBU                                                 │
+╰────────────────────────────────────────────────────────────────────────────────────────╯</code></pre><pre><code class="language-julia hljs">text(render_history(s; width = 80))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">╭──── history ─────────────────────────────────────────────────────────────────╮
+│  ✓ Solve for 2 targets  ◀ now                                                │
+╰──────────────────────────────────────────────────────────────────────────────╯</code></pre><h2 id="The-inventory"><a class="docs-heading-anchor" href="#The-inventory">The inventory</a><a id="The-inventory-1"></a><a class="docs-heading-anchor-permalink" href="#The-inventory" title="Permalink"></a></h2><p><a href="../api/#BrewQuiverTerm.render_inventory"><code>render_inventory</code></a>: what the brew needs of each ingredient, with the stock of the library of the session (here, one with a part of the malt and plenty of hops):</p><pre><code class="language-julia hljs">lib = Library()
+push!(lib, pale; stock = 3u&quot;kg&quot;)
+push!(lib, cascade; stock = 100u&quot;g&quot;)
+set_library!(s, lib)
+text(render_inventory(s; width = 90))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">╭──── inventory ─────────────────────────────────────────────────────────────────────────╮
+│  the library has 2 ingredients                                                         │
+│  Ingredient     Needed   In stock                                                      │
+│  ─────────────  ───────  ────────  ───────                                             │
+│  Cascade        66 g     100 g     ✓                                                   │
+│  Corn sugar     130 g    –         ⚠ short                                             │
+│  Crystal 60     282 g    –         ⚠ short                                             │
+│  Pale ale malt  4.23 kg  3.00 kg   ⚠ short                                             │
+│  US-05          1 ×      –         ⚠ short                                             │
+╰────────────────────────────────────────────────────────────────────────────────────────╯</code></pre><h2 id="The-status-bar"><a class="docs-heading-anchor" href="#The-status-bar">The status bar</a><a id="The-status-bar-1"></a><a class="docs-heading-anchor-permalink" href="#The-status-bar" title="Permalink"></a></h2><pre><code class="language-julia hljs">text(render_statusbar(s; width = 100))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">new quiver ●  │  ok  │  undo: Solve for 2 targets</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../tutorial/">« Tutorial: a batch from scratch</a><a class="docs-footer-nextpage" href="../keys/">Keys »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.20.0 on <span class="colophon-date" title="Sunday 22 November 2026 13:47">Sunday 22 November 2026</span>. Using Julia version 1.13.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
