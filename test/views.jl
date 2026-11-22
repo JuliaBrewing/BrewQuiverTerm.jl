@@ -99,7 +99,7 @@ using BrewQuiverTerm: clock
         @test occursin("── quiver ─", f) && occursin(r"l\s+arrange", f)
         handle!(app, 'l')
         @test undo_description(app.session) == "Arrange the nodes" && app.message == "arranged the nodes"
-        handle!(app, :enter)
+        handle!(app, 'i')
         @test app.mode isa Inspect
         handle!(app, :esc); handle!(app, 'd'); handle!(app, 'd')
         @test app.mode isa Browse

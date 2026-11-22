@@ -57,11 +57,11 @@ BrewQuiverTerm.run("bitter.quiver.json")     # a quiver; or a BeerJSON recipe, i
 | `↓` `↑` `j` `k`, `PgDn` `PgUp`, `g` `G` | move between the nodes, in topological order |
 | `Tab` `Shift-Tab`, `→` `←` | the node, its columns, and the arrows leaving it (`↓` `↑` keep the column) |
 | `Space` | what the cell, node or arrow is, and what `e` does to it |
-| `Enter` `i` | inspect the node or arrow (`↓` `↑` scroll, `j` `k` move) |
+| `i` | inspect the node or arrow (`↓` `↑` scroll, `j` `k` move) |
 | `Esc` `q` `←` | back to the overview |
 | `s` `Ctrl-S`, `S` | save, save as |
 | `o` `Ctrl-O` | open a quiver, or import a BeerJSON recipe |
-| `e` | edit the item, or the cell in place: an ingredient (its amount, or which one, chosen in a list typed to search; `Shift-↓` `↑` the next, previous one), water (its volume, temperature, or water profile: `calcium 50, sulfate 100`), a salt or acid (its amount), or an arrow (its kind, or a field chosen by number: `70 min`, `90%`, `at 55 min`, empty for the vessel's or the default) |
+| `e` `Enter` | edit the item, or the cell in place (the value proposed is replaced by what is typed, deleted whole by `Backspace`, kept to change with `→`): an ingredient (its amount, or which one, chosen in a list typed to search; `Shift-↓` `↑` the next, previous one), water (its volume, temperature, or water profile: `calcium 50, sulfate 100`), a salt or acid (its amount), or an arrow (its kind, or a field chosen by number: `70 min`, `90%`, `at 55 min`, empty for the vessel's or the default) |
 | `a` | add an ingredient chosen in a list (typed to search), then its label and amount (`pale malt 4.5 kg`); water (`strike_water 16 L 75 °C`); a stage (`trub kettle`); an ingredient typed (`munich 0.5 kg Munich malt`, `Tab` completes); or start from a template (single batch, parti-gyle, split batch, brew in a bag). An ingredient not known is defined there (`yield 80%, color 9 °L`) |
 | `c` | connect the node to another: its label, and the kind of arrow if not a transfer (`wort boil`) |
 | `E` | the equipment of the vessel of the node (capacity, dead space, evaporation, ...) |

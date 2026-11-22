@@ -59,7 +59,7 @@ end
 
     @testset "Inspecting and help" begin
         app = App(Session(single_batch()))
-        handle!(app, :enter)
+        handle!(app, 'i')
         @test app.mode isa Inspect
         handle!(app, :down); handle!(app, :down)
         @test app.scroll == 2
@@ -86,9 +86,11 @@ end
             app = App(Session(single_batch()))
             handle!(app, 's')
             @test app.mode isa Prompt && app.mode.question == "Save as"
-            handle!(app, :backspace)                           # edit the default path
+            @test app.mode.fresh                               # the path proposed:
+            handle!(app, :right); handle!(app, :backspace)     # changed (→ first)
             @test app.mode.buffer == "quiver.quiver.jso"
-            app.mode.buffer = ""
+            handle!(app, :esc); handle!(app, 's'); handle!(app, :backspace)
+            @test app.mode.buffer == ""                        # or deleted whole
             type!(app, file)
             handle!(app, :enter)
             @test app.mode isa Browse && isfile(file) && !isdirty(app.session)
@@ -171,7 +173,7 @@ end
         handle!(app, :end)
         ls = split(render_text(render_app(app; width = 100, height = 20)), '\n')
         @test length(ls) == 20 && any(l -> occursin("▶", l) && occursin("bottles", l), ls)
-        handle!(app, :enter)
+        handle!(app, 'i')
         ls = split(render_text(render_app(app; width = 100, height = 20)), '\n')
         @test occursin(":bottles", ls[2]) && occursin(r"Esc\s+back", ls[end-1])
         handle!(app, '?')

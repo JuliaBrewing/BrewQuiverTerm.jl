@@ -51,9 +51,12 @@ mutable struct Prompt <: Mode
     complete::Union{Nothing, Function}
     # the text being completed by Tab, and the completion shown
     completing::Union{Nothing, Tuple{String, Vector{String}, Int}}
+    # whether the text is the one proposed, untouched: replaced by what is typed, deleted
+    # whole by Backspace or Delete (→ ← End Home keep it, to change it)
+    fresh::Bool
 end
 Prompt(question, buffer, submit, back, cell = nothing) =
-    Prompt(question, buffer, submit, back, cell, nothing, nothing)
+    Prompt(question, buffer, submit, back, cell, nothing, nothing, !isempty(buffer))
 
 """
     Confirm(question, choices, back)
@@ -328,7 +331,7 @@ function handle!(app::App, ::Browse, key)
         cycle!(app, 1)
     elseif key === :left
         cycle!(app, -1)
-    elseif key in (:enter, 'i')
+    elseif key === 'i'
         current(app) === nothing || (app.mode = Inspect(); app.scroll = 0)
     elseif key === ' '
         explain_cell!(app)
@@ -373,7 +376,12 @@ end
 
 function handle!(app::App, p::Prompt, key)
     key === :tab || (p.completing = nothing)
-    if key === :tab
+    fresh, p.fresh = p.fresh, false
+    if fresh && key in (:backspace, :delete)          # the text proposed: deleted whole
+        p.buffer = ""
+    elseif fresh && key isa Char                      # or replaced by what is typed
+        p.buffer = string(key)
+    elseif key === :tab
         complete!(p)
     elseif key === :enter
         app.mode = p.back

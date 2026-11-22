@@ -10,15 +10,17 @@ const HELP = """
                   the node, its columns (in the overview) and the arrows leaving it;
                   ↓ ↑ keep the column in the rows that have it
   Space           what the cell, node or arrow is, and what e does to it
-  Enter  i        inspect the node or arrow
+  i               inspect the node or arrow
   Esc  q  ←       back to the overview
 
 {bold}Editing{/bold}  (each edit can be undone; the nodes it changed are marked ✱)
-  e               edit: an ingredient (amount, which one; water: volume, temperature,
+  e  Enter        edit: an ingredient (amount, which one; water: volume, temperature,
                   profile), or an arrow (its kind, or a field); on a cell, in place: an
                   ingredient is chosen in a list of those of its kind (typed to search), and a
                   value computed by the brew (gravity, IBU, ...) takes a goal and what to
                   vary to reach it, and is solved for
+                  A value proposed (shown in reverse video) is replaced by what is
+                  typed, and deleted whole by Backspace; → ← End Home keep it, to change it
   Shift-↓ ↑       on an ingredient's name: the next, previous one of its kind
   a               add an ingredient, chosen in a list (typed to search; the starter library,
                   and yours, see L), then its label and amount (pale malt 4.5 kg: the
@@ -62,12 +64,12 @@ const HELP = """
 """
 
 # the keys of a mode, as `key => what it does`
-hints(::Browse) = ["↓↑" => "move", "←→ Tab" => "columns, arrows", "Space" => "what is it", "Enter" => "inspect",
-                   "e" => "edit", "u" => "undo", "U" => "redo", "?" => "help", "q" => "quit"]
-hints(::Inspect) = ["↓↑" => "scroll", "j k" => "move", "Tab" => "arrows", "e" => "edit", "u" => "undo",
+hints(::Browse) = ["↓↑" => "move", "←→ Tab" => "columns, arrows", "Space" => "what is it",
+                   "Enter e" => "edit", "i" => "inspect", "u" => "undo", "U" => "redo", "?" => "help", "q" => "quit"]
+hints(::Inspect) = ["↓↑" => "scroll", "j k" => "move", "Tab" => "arrows", "Enter e" => "edit", "u" => "undo",
                     "U" => "redo", "Esc" => "back", "?" => "help"]
-hints(::DagView) = ["↓↑" => "move", "Tab" => "arrows", "Enter" => "inspect", "l" => "arrange",
-                    "d" => "overview", "e" => "edit", "u" => "undo", "?" => "help"]
+hints(::DagView) = ["↓↑" => "move", "Tab" => "arrows", "Enter e" => "edit", "i" => "inspect", "l" => "arrange",
+                    "d" => "overview", "u" => "undo", "?" => "help"]
 hints(::TimelineView) = ["+ -" => "zoom", "↓↑" => "scroll", "Esc" => "back"]
 hints(::InventoryView) = ["C" => "take from the stock", "W" => "write the library", "↓↑" => "scroll",
                           "Esc" => "back"]
@@ -75,8 +77,9 @@ hints(::SolutionView) = ["u" => "undo the solve", "Esc" => "back"]
 hints(::HistoryView) = ["↓↑" => "scroll", "u" => "undo", "U" => "redo", "Esc" => "back"]
 hints(::Help) = ["↓↑" => "scroll", "Esc" => "back"]
 hints(::Picker) = ["type" => "search", "↓↑" => "choose", "Enter" => "pick", "Esc" => "cancel"]
-hints(p::Prompt) = p.complete === nothing ? ["Enter" => "ok", "Esc" => "cancel"] :
-                                            ["Tab" => "complete", "Enter" => "ok", "Esc" => "cancel"]
+hints(p::Prompt) = [p.complete === nothing ? Pair{String, String}[] : ["Tab" => "complete"];
+                    p.fresh ? ["type" => "replace", "Bksp" => "clear", "→" => "change"] : Pair{String, String}[];
+                    "Enter" => "ok"; "Esc" => "cancel"]
 
 # the second line of keys: the common ones, where the quiver is browsed
 const MORE_KEYS = ["a" => "add", "c" => "connect", "x" => "remove", "d" => "drawing", "t" => "timeline",
@@ -110,7 +113,10 @@ main_lines(app::App, m::Union{Prompt, Confirm}, width) = main_lines(app, m.back,
 # typed, or chosen, in place
 main_lines(app::App, p::Prompt, width) = p.cell === nothing || !(p.back isa Browse) ? main_lines(app, p.back, width) :
     _lines(render_overview(app.session; width, cell = p.cell,
-                           edit = styled(plain(p.buffer), "bold") * styled("▏", ACCENT)))
+                           edit = _typed(p)))
+# the text of a prompt, as typed: the one proposed in reverse video (typing replaces it)
+_typed(p::Prompt) = (p.fresh ? styled(plain(p.buffer), "bold inverse") : styled(plain(p.buffer), "bold")) *
+                    styled("▏", ACCENT)
 function main_lines(app::App, p::Picker, width)
     (p.cell === nothing || !(p.back isa Browse)) && return _lines(render_picker(p; width))
     es = entries(p)
@@ -145,7 +151,7 @@ end
 # the bottom line: the prompt being typed, the question asked, or the last message
 function message_line(app::App, p::Prompt)
     p.cell === nothing || return styled(plain(p.question), "bold " * ACCENT) * styled("  (typed in place)", DIM)
-    line = styled(plain(p.question) * ": ", "bold " * ACCENT) * plain(p.buffer) * styled("▏", ACCENT)
+    line = styled(plain(p.question) * ": ", "bold " * ACCENT) * _typed(p)
     cs = completions(p)
     isempty(cs) || (line *= styled("   Tab: " * plain(join(first(cs, 4), " · ")) * (length(cs) > 4 ? " …" : ""), DIM))
     return line
