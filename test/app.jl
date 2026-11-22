@@ -189,7 +189,9 @@ end
     @testset "Key hints" begin
         using BrewQuiverTerm: hints, hints_text, keycap
         @test hints(Browse())[end] == ("q" => "quit")
-        @test hints(Prompt("x", "", nothing, Browse())) == ["Enter" => "ok", "Esc" => "cancel"]
+        @test hints(Prompt("x", "", (app, t) -> app, Browse())) == ["Enter" => "ok", "Esc" => "cancel"]
+        @test isconcretetype(typeof(App(Session(Quiver()))))     # (no abstract session)
+        @test_throws MethodError Prompt("x", "", nothing, Browse())
         c = Confirm("Quit?", ['s' => ("save first", identity), 'd' => ("discard them", identity)], Browse())
         @test hints(c) == ["s" => "save first", "d" => "discard them", "Esc" => "cancel"]
         # each key in reverse video, then what it does, without colons

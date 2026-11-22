@@ -57,7 +57,7 @@ function profile_text(p)
     return isempty(t) ? "" : t * " mg/L"
 end
 function parse_profile(text)
-    kw = Dict{Symbol, Any}()
+    kw = Dict{Symbol, Unitful.Quantity}()
     unit = occursin("ppm", text) ? u"mg/L" : nothing
     for part in split(replace(text, "mg/L" => "", "ppm" => ""), ',')
         words = split(part)
@@ -124,7 +124,7 @@ const EXAMPLES = Dict("fermentable" => "yield 80%, color 9 °L",
 
 # "yield 80%, color 9 °L" as keyword arguments, among the `props` allowed
 function parse_properties(text, props)
-    kw = Dict{Symbol, Any}()
+    kw = Dict{Symbol, Union{Symbol, Unitful.Quantity, Real}}()
     for part in split(text, ',')
         words = split(part)
         isempty(words) && continue

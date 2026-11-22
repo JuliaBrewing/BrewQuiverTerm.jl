@@ -42,7 +42,7 @@ moved_text(s, a::ArrowSummary) =
 
 section(title) = block(styled(title, "bold " * ACCENT))
 
-arrows_text(s, as::Vector{ArrowSummary}, other) =
+arrows_text(s, as::Vector{<:ArrowSummary}, other) =
     isempty(as) ? styled("–", DIM) :
     join((let t = "$(a.kind) $(other(a))" * (a.index > 1 ? " #$(a.index)" : "") *
                   (a.moved_volume === missing ? "" : "  " * styled(moved_text(s, a), DIM))

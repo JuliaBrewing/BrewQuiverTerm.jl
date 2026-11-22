@@ -23,9 +23,9 @@ end
 
 The solution of the last `Solve`.
 """
-struct SolutionView <: Mode
+struct SolutionView{S} <: Mode
     back::Mode
-    solution::Any
+    solution::S
 end
 
 # `T`: solve for targets

@@ -42,7 +42,7 @@ A line of text to type, for `question`, starting with `buffer`: Enter calls
 mutable struct Prompt <: Mode
     question::String
     buffer::String
-    submit::Any
+    submit::Function
     back::Mode
 end
 
@@ -54,7 +54,7 @@ A question answered with a key: `choices` are `key => (label, action)`, the acti
 """
 struct Confirm <: Mode
     question::String
-    choices::Vector{Pair{Char, Tuple{String, Any}}}
+    choices::Vector{Pair{Char, Tuple{String, Function}}}
     back::Mode
 end
 
@@ -66,8 +66,8 @@ The state of the interactive app: the `Session` of BrewQuiverUICore being edited
 the last message, whether to quit, and the file of the library of ingredients. Keys are given to [`handle!`](@ref), frames drawn
 with [`render_app`](@ref).
 """
-mutable struct App
-    session::Session
+mutable struct App{S <: Session}
+    session::S
     mode::Mode
     scroll::Int
     message::String
@@ -76,7 +76,7 @@ mutable struct App
     # the file of the library of ingredients, to save its stock
     library_path::Union{Nothing, String}
 end
-App(s::Session) = (app = App(s, Browse(), 0, "", false, false, nothing); _select_first!(app); app)
+App(s::Session) = (app = App{typeof(s)}(s, Browse(), 0, "", false, false, nothing); _select_first!(app); app)
 
 _select_first!(app) =
     (ns = nodes(quiver(app.session)); isempty(ns) || select!(app.session, NodeRef(first(ns))); app)
