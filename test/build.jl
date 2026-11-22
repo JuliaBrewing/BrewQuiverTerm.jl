@@ -1,7 +1,7 @@
 # Building a quiver from scratch with the keys: water, lots with new ingredients, stages,
 # arrows; then editing water, ingredients, the kinds of arrows, equipment, and a library.
 
-using BrewQuiverTerm: holding, Stage, IngredientLot, WaterLot, AgentLot, Mixed, parse_lot,
+using BrewQuiverTerm: holding, Stage, IngredientLot, WaterLot, AgentLot, Mixed, parse_lot, parse_label_amount,
     parse_water, parse_profile, profile_text, parse_properties
 
 keys!(app, ks...) = foreach(k -> k isa AbstractString ? type!(app, k) : handle!(app, k), ks)
@@ -17,6 +17,12 @@ ok(app) = (app.iserror && @info(app.message); !app.iserror)
         @test parse_lot(":hops 30 g East Kent Goldings") == (:hops, 30u"g", "East Kent Goldings")
         @test_throws ArgumentError parse_lot("munich 0.5 kg")
         @test_throws ArgumentError parse_lot("munich lots Munich")
+        @test parse_lot("pale malt 4.5 kg Pale ale malt") == (:pale_malt, 4.5u"kg", "Pale ale malt")   # a label of words
+        @test parse_label_amount("base malt 2 kg") == (:base_malt, 2u"kg")
+        @test parse_label_amount("yeast 1") == (:yeast, 1)
+        @test_throws ArgumentError parse_label_amount("2 kg")
+        @test_throws ArgumentError parse_label_amount("pale 2 kg Pale")
+        @test parse_water("hot liquor 16 L") == (:hot_liquor, 16u"L", 20u"°C")
         @test parse_water("strike_water 16 L 75 °C") == (:strike_water, 16u"L", 75u"°C")
         @test parse_water("w 16L") == (:w, 16u"L", 20u"°C")
         @test_throws ArgumentError parse_water("w 16 kg")
@@ -47,23 +53,45 @@ ok(app) = (app.iserror && @info(app.message); !app.iserror)
         @test ok(app) && current(app) == NodeRef(:strike_water)
         @test occursin("connect it with c", app.message)
         @test liquor(quiver(app.session)[:strike_water].initial).temperature ≈ 75u"°C"
-        # lots of new ingredients, defined on the way
-        keys!(app, 'a', 'l'); say!(app, "pale 4.5 kg Pale ale malt")
-        @test app.mode isa Confirm && occursin("no ingredient named \"Pale ale malt\"", app.mode.question)
+        # new ingredients, defined on the way
+        keys!(app, 'a', 'l'); say!(app, "pale 4.5 kg House pale malt")
+        @test app.mode isa Confirm && occursin("no ingredient named \"House pale malt\"", app.mode.question)
         @test [k for (k, _) in app.mode.choices] == ['f', 'h', 'c']
         handle!(app, 'f')
         @test app.mode isa Prompt && occursin("yield", app.mode.question)
         say!(app, "yield 80%, color 3 °L")
         @test ok(app) && lot_amount(app, :pale) ≈ 4.5u"kg"
         @test only(solids(quiver(app.session)[:pale].initial)).ingredient.color ≈ uconvert(u"SRM", 3u"°L")
-        keys!(app, 'a', 'l'); say!(app, "cascade 50 g Cascade"); handle!(app, 'h'); say!(app, "alpha 6%")
+        keys!(app, 'a', 'l'); say!(app, "cascade 50 g Homegrown hops"); handle!(app, 'h'); say!(app, "alpha 6%")
         @test ok(app) && lot_amount(app, :cascade) ≈ 50u"g"
-        keys!(app, 'a', 'l'); say!(app, "yeast 1 US-05"); handle!(app, 'c')
+        keys!(app, 'a', 'l'); say!(app, "yeast 1 Barn yeast"); handle!(app, 'c')
         say!(app, "attenuation 78%, form dry")
         @test ok(app) && lot_amount(app, :yeast) == 1
-        # an ingredient now known: no question
-        keys!(app, 'a', 'l'); say!(app, "pale2 1 kg pale ale")
+        # an ingredient known (of the starter library): no question
+        keys!(app, 'a', 'l'); say!(app, "pale2 1 kg maris otter")
         @test ok(app) && app.mode isa Browse && haskey(quiver(app.session), :pale2)
+        # a name matching several: chosen in a list
+        keys!(app, 'a', 'l'); say!(app, "spec 0.1 kg crystal")
+        @test app.mode isa Picker && app.mode.filter == "crystal" && length(BrewQuiverTerm.matches(app.mode)) == 4
+        handle!(app, :down); handle!(app, :enter)
+        @test ok(app) && only(solids(quiver(app.session)[:spec].initial)).ingredient.name == "Crystal 40"
+        handle!(app, 'u')
+        # from the list of all: typed to search, then the label (of words) and the amount
+        keys!(app, 'a', 'i')
+        @test app.mode isa Picker && first(app.mode.items) == "water" && length(app.mode.items) > 80
+        type!(app, "vienn")
+        @test BrewQuiverTerm.matches(app.mode) == ["Vienna malt"]
+        handle!(app, :enter)
+        @test app.mode isa Prompt && app.mode.buffer == "vienna 1.00 kg"
+        say!(app, "base malt 0.5 kg")
+        @test ok(app) && lot_amount(app, :base_malt) ≈ 0.5u"kg"
+        handle!(app, 'u')
+        # typed, completed with Tab
+        keys!(app, 'a', 'l'); type!(app, "x 1 kg citr")
+        @test occursin("Tab: Citra", render_text(render_app(app; width = 120, height = 20)))
+        handle!(app, :tab)
+        @test app.mode.buffer == "x 1 kg Citra"
+        handle!(app, :esc)
         keys!(app, 'a', 'l'); say!(app, "gypsum 4 g gypsum")
         @test ok(app) && holding(quiver(app.session)[:gypsum].initial) == AgentLot()
         # stages
@@ -118,19 +146,20 @@ ok(app) = (app.iserror && @info(app.message); !app.iserror)
         @test app.iserror && occursin("not an ion", app.message)
         keys!(app, 'e', '1'); say!(app, "17 L")
         @test ok(app) && isapprox(volume(quiver(app.session)[:strike_water].initial), 17u"L"; rtol = 1e-3)
-        # an ingredient: one known, one defined (of the same kind), one ambiguous
+        # an ingredient: chosen among those of its kind, or one defined (of the same kind)
         select!(app.session, NodeRef(:crystal)); keys!(app, 'e')
         @test [l for (_, (l, _)) in app.mode.choices] == ["amount", "ingredient"]
         handle!(app, '2')
-        @test app.mode.buffer == "Crystal 60"
-        say!(app, "Maris Otter")
-        @test app.mode isa Confirm && [k for (k, _) in app.mode.choices] == ['f']
-        handle!(app, 'f'); say!(app, "yield 81%, color 4 °L")
+        @test app.mode isa Picker && BrewQuiverTerm.entries(app.mode)[app.mode.index] == "Crystal 60"
+        @test !("Cascade" in app.mode.items)                          # no hops for a malt
+        type!(app, "maris"); handle!(app, :enter)
         @test ok(app) && only(solids(quiver(app.session)[:crystal].initial)).ingredient.name == "Maris Otter"
-        keys!(app, 'e', '2'); say!(app, "Cascade")                  # a hop for a malt: refused
-        @test app.iserror && occursin("takes a fermentable", app.message)
-        keys!(app, 'e', '2'); say!(app, "a")
-        @test app.iserror && occursin("could be", app.message)
+        keys!(app, 'e', '2'); type!(app, "Golden promise")
+        @test BrewQuiverTerm.entries(app.mode) == [BrewQuiverTerm.DEFINE]
+        handle!(app, :enter)
+        @test app.mode isa Confirm && [k for (k, _) in app.mode.choices] == ['f']
+        handle!(app, 'f'); say!(app, "yield 81%, color 2 °L")
+        @test ok(app) && only(solids(quiver(app.session)[:crystal].initial)).ingredient.name == "Golden promise"
         keys!(app, 'e', '1'); say!(app, "0.2 kg")
         @test ok(app) && lot_amount(app, :crystal) ≈ 0.2u"kg"
         # an undefined ingredient's properties refused
@@ -183,7 +212,7 @@ ok(app) = (app.iserror && @info(app.message); !app.iserror)
             app = App(Session(single_batch()))
             handle!(app, 'L'); say!(app, f)
             @test ok(app) && occursin("loaded 1 ingredients", app.message)
-            keys!(app, 'a', 'l'); say!(app, "munich 0.5 kg munich")
+            keys!(app, 'a', 'l'); say!(app, "munich 0.5 kg munich malt")   # (yours, not the starter's)
             @test ok(app) && app.mode isa Browse
             @test only(solids(quiver(app.session)[:munich].initial)).ingredient.color ≈ uconvert(u"SRM", 9u"°L")
             a = BrewQuiverTerm.run(; library = f, input = IOBuffer(""), output = IOBuffer(), size = (24, 90))

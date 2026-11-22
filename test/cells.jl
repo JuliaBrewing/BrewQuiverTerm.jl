@@ -26,6 +26,12 @@ row(app, label) = only(l for l in split(frame(app), '\n') if occursin(Regex("\\b
         @test current(app) == NodeRef(:crystal) && current_column(app) === :ingredient
         goto!(app, :wort); handle!(app, :backtab)              # Shift-Tab: the last arrow
         @test current(app) isa ArrowRef && current_column(app) === nothing
+        goto!(app, :pale); handle!(app, :right)                # → ←: as Tab and Shift-Tab
+        @test current_column(app) === :amount
+        handle!(app, :right); handle!(app, :left)
+        @test current_column(app) === :amount
+        handle!(app, :left)
+        @test current(app) == NodeRef(:pale) && current_column(app) === nothing && app.mode isa Browse
         @test decode_keys("\e[1;2B\e[1;2A") == [:shift_down, :shift_up]
     end
 
@@ -55,35 +61,42 @@ row(app, label) = only(l for l in split(frame(app), '\n') if occursin(Regex("\\b
 
     @testset "Choosing an ingredient" begin
         app = App(Session(single_batch()))
+        name(l) = only(quiver(app.session)[l].initial.solids).ingredient.name
+        fermentables = search_ingredients(app.session; role = :fermentable)
         cell!(app, :pale, :ingredient); handle!(app, 'e')
         p = app.mode
-        @test p isa Picker && p.items == ["Corn sugar", "Crystal 60", "Pale ale malt"]   # the fermentables
+        @test p isa Picker && p.items == fermentables && !("Cascade" in p.items)   # those of its kind
         @test p.items[p.index] == "Pale ale malt"
-        @test occursin("‹ Pale ale malt ›", row(app, "pale")) && occursin("3 of 3", frame(app))
+        @test occursin("‹ Pale ale malt ›", row(app, "pale"))
+        f = frame(app)
+        @test occursin("type to search $(length(fermentables))", f)
+        @test occursin(r"Munich malt\s+malt", f)                         # the list dropping down
         handle!(app, :up)
-        @test p.items[p.index] == "Crystal 60"
-        handle!(app, 'p'); @test p.items[p.index] == "Pale ale malt"       # a letter jumps
-        handle!(app, 'c'); @test p.items[p.index] == "Corn sugar"
+        @test p.items[p.index] == fermentables[findfirst(==("Pale ale malt"), fermentables) - 1]
+        type!(app, "crys")                                              # typed: searched
+        @test BrewQuiverTerm.matches(p) == ["Crystal 15", "Crystal 40", "Crystal 60", "Crystal 120"]
+        @test occursin("4 of $(length(fermentables))", frame(app)) && occursin("‹ Crystal 15 ›", frame(app))
+        foreach(_ -> handle!(app, :backspace), 1:4); type!(app, "chocolate")
+        @test BrewQuiverTerm.matches(p)[1:2] == ["Chocolate malt", "Pale chocolate malt"]
         handle!(app, :esc)
-        @test only(quiver(app.session)[:pale].initial.solids).ingredient.name == "Pale ale malt"
-        handle!(app, 'e'); handle!(app, :up); handle!(app, :enter)
+        @test name(:pale) == "Pale ale malt"
+        handle!(app, 'e'); type!(app, "crystal 6"); handle!(app, :enter)
         c = only(quiver(app.session)[:pale].initial.solids)
         @test c.ingredient.name == "Crystal 60" && c.amount ≈ 4.5u"kg"   # the amount kept
         handle!(app, 'u')
-        @test only(quiver(app.session)[:pale].initial.solids).ingredient.name == "Pale ale malt"
+        @test name(:pale) == "Pale ale malt"
         # Shift-↓↑: the next, previous one at once
+        i = findfirst(==("Pale ale malt"), fermentables)
         handle!(app, :shift_up)
-        @test only(quiver(app.session)[:pale].initial.solids).ingredient.name == "Crystal 60"
-        handle!(app, :shift_up)
-        @test only(quiver(app.session)[:pale].initial.solids).ingredient.name == "Corn sugar"
-        handle!(app, :shift_up)
-        @test occursin("no other", app.message)
-        @test length(history(app.session)) == 1                          # (the two quick ones merged)
+        @test name(:pale) == fermentables[i - 1]
+        handle!(app, :shift_down); handle!(app, :shift_down)
+        @test name(:pale) == fermentables[i + 1]
+        @test length(history(app.session)) == 1                          # (quick ones merged)
         cell!(app, :pale, :amount); handle!(app, :shift_down)
-        @test app.iserror && occursin("Tab to its ingredient", app.message)
+        @test app.iserror && occursin("Tab to its name", app.message)
         # the hops are chosen among the hops
         cell!(app, :cascade, :ingredient); handle!(app, 'e')
-        @test app.mode.items == ["Cascade"]
+        @test "Citra" in app.mode.items && !("Pale ale malt" in app.mode.items)
     end
 
     @testset "Solving for a computed value" begin
@@ -118,4 +131,21 @@ row(app, label) = only(l for l in split(frame(app), '\n') if occursin(Regex("\\b
         goto!(app, :kettle); handle!(app, :backtab); handle!(app, ' ')
         @test occursin("the arrow :kettle → :wort", app.message)
     end
+end
+
+@testset "Templates" begin
+    app = App(Session(Quiver()))
+    @test occursin("template", frame(app))                     # the empty quiver says so
+    keys!(app, 'a', 't')
+    @test app.mode isa Picker && app.mode.items == first.(TEMPLATES)
+    @test occursin("parti-gyle", frame(app)) && occursin("two beers", frame(app))
+    type!(app, "parti"); handle!(app, :enter)
+    @test app.mode isa Browse && !app.iserror && isbrewed(app.session)
+    @test haskey(quiver(app.session), :kettle2) && occursin("a new parti-gyle", app.message)
+    # a quiver with changes: asks first
+    apply!(app.session, SetAmount(:pale, 7u"kg"))
+    keys!(app, 'a', 't'); type!(app, "single"); handle!(app, :enter)
+    @test app.mode isa Confirm && occursin("unsaved", app.mode.question)
+    handle!(app, 'd')
+    @test !haskey(quiver(app.session), :kettle2) && haskey(quiver(app.session), :bottles)
 end

@@ -26,12 +26,12 @@ function edit_item!(app::App, r::NodeRef)
 end
 
 edit_lot!(app::App, n, c, ::Stage) = error!(app, ":$n is filled by its arrows: edit them (Tab to select one)")
-edit_lot!(app::App, n, c, ::Mixed) = error!(app, ":$n holds several things: set them on the lots it comes from")
+edit_lot!(app::App, n, c, ::Mixed) = error!(app, ":$n holds several things: set them on the nodes it comes from")
 edit_lot!(app::App, n, c, ::AgentLot) = edit_amount!(app, n, total_mass(c), :agent)
 edit_lot!(app::App, n, c, ::IngredientLot) =
     menu!(app, "Edit :$n", ['1' => ("amount", app -> edit_amount!(app, n, only(c.solids).amount,
                                                                      unit_role(only(c.solids).ingredient))),
-                            '2' => ("ingredient", app -> edit_ingredient!(app, n, only(c.solids).ingredient))])
+                            '2' => ("ingredient", app -> pick_ingredient!(app, n, only(c.solids).ingredient))])
 edit_lot!(app::App, n, c, ::WaterLot) =
     menu!(app, "Edit :$n", ['1' => ("volume", app -> edit_amount!(app, n, uconvert(u"L", volume(c)), :volume)),
                             '2' => ("temperature", app -> edit_temperature!(app, n, c)),
@@ -76,14 +76,6 @@ edit_profile!(app::App, n, c) =
         edit!(app, SetWaterProfile(n, parse_profile(text)))
     end
 
-# the ingredient of a lot: one of the catalog, or a new one of the same kind
-edit_ingredient!(app::App, n, old) =
-    ask!(app, "Ingredient of :$n", old.name) do app, text
-        with_ingredient(app, text, typeof(old)) do app, i
-            edit!(app, SetIngredient(n, i))
-        end
-    end
-
 # ---------------------------------------------------------------------------------------
 # finding and defining ingredients
 
@@ -94,18 +86,37 @@ const INGREDIENT_KINDS = [
     'c' => ("culture", Culture, (:attenuation, :kind, :form))]
 const SYMBOL_PROPERTIES = (:kind, :form)
 
-# do `f(app, ingredient)` with the ingredient of the catalog named `text`; if there is none,
-# offer to define it (as a `kind`, or asking which)
+# the role of the ingredients of a type (see `unit_role`), or `nothing` for any
+_role(::Nothing) = nothing
+_role(::Type{Fermentable}) = :fermentable
+_role(::Type{Hop}) = :hop
+_role(::Type{Culture}) = :culture
+_role(::Type) = :agent
+
+# do `f(app, ingredient)` with the ingredient of the catalog named `text` (of type `kind`, if
+# given): the one of that name, or the only one matching it; when several match, choose one
+# in a list (or define a new one); when none does, offer to define it
 function with_ingredient(f, app::App, text, kind = nothing)
-    name = strip(text)
-    i = try
-        find_ingredient(app.session, name)
-    catch e
-        e isa ArgumentError || rethrow()
-        occursin("no ingredient", e.msg) || return error!(app, e.msg)
-        nothing
+    name = String(strip(text))
+    isempty(name) && return error!(app, "give the name of an ingredient")
+    c = catalog(app.session)
+    ok(i) = kind === nothing || i isa kind
+    for (n, i) in c
+        lowercase(n) == lowercase(name) && ok(i) && return f(app, i)
     end
-    i === nothing || return f(app, i)
+    role = _role(kind)
+    found = search_ingredients(app.session, name; role)
+    length(found) == 1 && return f(app, c[only(found)])
+    isempty(found) && return define_menu!(f, app, name, kind)
+    app.mode = Picker("Which ingredient?", search_ingredients(app.session; role); filter = name,
+                      submit = (app, x) -> f(app, c[x]), back = app.mode, tags = ingredient_tags(app.session),
+                      search = t -> search_ingredients(app.session, t; role),
+                      create = (app, t) -> define_menu!(f, app, t, kind))
+    return info!(app, "$(length(found)) ingredients match $(repr(name)): choose one, or define it")
+end
+
+# define a new ingredient named `name` (a `kind`, or asking which), then `f(app, ingredient)`
+function define_menu!(f, app::App, name, kind = nothing)
     kinds = [k => (label, app -> define_ingredient!(f, app, name, label, T, props))
              for (k, (label, T, props)) in INGREDIENT_KINDS if kind === nothing || T === kind]
     isempty(kinds) && return error!(app, "there is no ingredient named $(repr(String(name)))")
@@ -140,15 +151,17 @@ end
 # ---------------------------------------------------------------------------------------
 # adding nodes
 
-# `a`: add a stage, a lot of an ingredient, or water
+# `a`: add an ingredient (from a list, or typed), water, a stage, or start from a template
 add_node!(app::App) =
-    menu!(app, "Add", ['s' => ("a stage", add_stage!), 'l' => ("a lot of an ingredient", add_lot!),
-                       'w' => ("water", add_water!)])
+    menu!(app, "Add", ['i' => ("an ingredient", add_ingredient!), 'w' => ("water", add_water!),
+                       's' => ("a stage", add_stage!), 'l' => ("an ingredient, typed", add_lot!),
+                       't' => ("a template", pick_template!)])
 
 function _added!(app::App, cmd)
     edit!(app, cmd)
     if haskey(quiver(app.session), cmd.label) && !app.iserror
         select!(app.session, NodeRef(cmd.label))
+        app.column = nothing
         info!(app, describe(cmd) * ": connect it with c")
     end
     return app
@@ -161,8 +174,57 @@ add_stage!(app::App) =
         _added!(app, AddNode(_label(words[1]); vessel = length(words) > 1 ? _label(words[2]) : nothing))
     end
 
-add_lot!(app::App) =
-    ask!(app, "Add a lot: its label, amount and ingredient (e.g. munich 0.5 kg Munich malt)") do app, text
+# `a i`: an ingredient chosen in a list of the catalog (and water), typed to search, then its
+# label and amount
+function add_ingredient!(app::App)
+    s = app.session
+    tags = ingredient_tags(s)
+    tags["water"] = "water"
+    app.mode = Picker("Add an ingredient", ["water"; search_ingredients(s)];
+                      submit = (app, x) -> x == "water" ? add_water!(app) : add_amount!(app, catalog(app.session)[x]),
+                      back = app.mode, tags,
+                      search = t -> [occursin(lowercase(strip(t)), "water") ? ["water"] : String[];
+                                     search_ingredients(app.session, t)],
+                      create = (app, t) -> define_menu!(add_amount!, app, t))
+    return info!(app, "type to search $(length(app.mode.items)) ingredients")
+end
+
+# the label and amount of a new lot of `i`
+function add_amount!(app::App, i)
+    p = units(app.session)
+    example = i isa Culture ? "1" : qtext(app.session, _default_amount(i); role = unit_role(i))
+    ask!(app, "Add $(i.name): its label and amount (e.g. $(suggest_label(app.session, i.name)) $example)",
+         suggest_label(app.session, i.name) * " " * example) do app, text
+        label, amount = parse_label_amount(text)
+        a = amount isa Real && !(i isa Culture) ? amount * preferred_unit(p, unit_role(i)) : amount
+        _added!(app, AddNode(label, i => a))
+    end
+end
+
+_default_amount(::Fermentable) = 1.0u"kg"
+_default_amount(::Hop) = 25.0u"g"
+_default_amount(::AbstractIngredient) = 5.0u"g"
+
+# a label for a lot of the ingredient `name` not taken in the quiver of `s`: its first word,
+# or all its words, joined by underscores, numbered if needed
+function suggest_label(s, name)
+    q = quiver(s)
+    words = [w for w in split(lowercase(name), r"[^\p{L}\p{N}]+") if !isempty(w)]
+    isempty(words) && (words = ["lot"])
+    for l in unique([words[1]; join(words, "_")])
+        occursin(r"^\p{L}", l) && !haskey(q, Symbol(l)) && return l
+    end
+    base = join(words, "_")
+    k = 2
+    while haskey(q, Symbol(base, "_", k))
+        k += 1
+    end
+    return "$(base)_$k"
+end
+
+# `a l`: typed, with the ingredient completed by Tab
+function add_lot!(app::App)
+    ask!(app, "Add (label amount ingredient, Tab completes)") do app, text
         label, amount, name = parse_lot(text)
         with_ingredient(app, name) do app, i
             # (a bare number: the preferred unit of the ingredient, but a count of a culture)
@@ -170,6 +232,21 @@ add_lot!(app::App) =
             _added!(app, AddNode(label, i => a))
         end
     end
+    app.mode.complete = buffer -> _complete_lot(app.session, buffer)
+    return app
+end
+
+# the completions of the name of the ingredient typed after the label and amount: the text
+# before it, and the names of the catalog matching it
+function _complete_lot(s, buffer)
+    words = split(buffer)
+    k = _amount_index(words)
+    (k === nothing || k == length(words) && !endswith(buffer, ' ')) && return buffer, String[]
+    _, after = try quantity_at(words, k) catch; return buffer, String[] end
+    n = length(words) ≥ after ? join(words[after:end], " ") : ""
+    prefix = join(words[1:after-1], " ") * " "
+    return prefix, isempty(strip(n)) ? String[] : search_ingredients(s, n)
+end
 
 # the quantity typed from word `i` ("0.5 kg", or "0.5kg", or a count "2"), and the index of
 # the word after it
@@ -181,30 +258,53 @@ function quantity_at(words, i)
     return parse_value(words[i]), i + 1
 end
 
-# "munich 0.5 kg Munich malt" as (:munich, 0.5 kg, "Munich malt"); "yeast 1 US-05" for counts
+# the index of the first word of an amount (a number), after the words of a label
+_amount_index(words) = findfirst(w -> occursin(r"^[+-]?[\d.]", w), words)
+
+# the label of the words before the amount: "pale malt" as :pale_malt
+function _label_words(words, k, example)
+    (k === nothing || k == 1) && throw(ArgumentError("give a label, then an amount: $example"))
+    return Symbol(join((lstrip(w, ':') for w in words[1:k-1]), "_"))
+end
+
+# "munich 0.5 kg Munich malt" as (:munich, 0.5 kg, "Munich malt"); "yeast 1 US-05" for counts;
+# a label of several words is joined by underscores ("pale malt 4 kg ..." as :pale_malt)
 function parse_lot(text)
     words = split(text)
-    length(words) ≥ 3 || throw(ArgumentError("give a label, an amount and an ingredient: munich 0.5 kg Munich malt"))
-    amount, k = quantity_at(words, 2)
-    k ≤ length(words) || throw(ArgumentError("give the ingredient after the amount"))
-    return _label(words[1]), amount, join(words[k:end], " ")
+    k = _amount_index(words)
+    label = _label_words(words, k, "munich 0.5 kg Munich malt")
+    amount, after = quantity_at(words, k)
+    after ≤ length(words) || throw(ArgumentError("give the ingredient after the amount"))
+    return label, amount, join(words[after:end], " ")
+end
+
+# "pale malt 4.5 kg" as (:pale_malt, 4.5 kg)
+function parse_label_amount(text)
+    words = split(text)
+    k = _amount_index(words)
+    label = _label_words(words, k, "pale 4.5 kg")
+    amount, after = quantity_at(words, k)
+    after ≤ length(words) && throw(ArgumentError("give only a label and an amount, e.g. pale 4.5 kg"))
+    return label, amount
 end
 
 # "strike_water 16 L 75 °C" as (:strike_water, 16 L, 75 °C); 20 °C if not given; numbers
 # without units in `volume` and `temperature`, if given
 function parse_water(text; volume = nothing, temperature = nothing)
     words = split(text)
-    length(words) ≥ 2 || throw(ArgumentError("give a label and a volume: strike_water 16 L 75 °C"))
-    v, k = quantity_at(words, 2)
+    i = _amount_index(words)
+    label = _label_words(words, i, "strike_water 16 L 75 °C")
+    v, k = quantity_at(words, i)
     v isa Real && volume !== nothing && (v = v * volume)
     v isa Unitful.Volume || throw(ArgumentError("give the volume of the water, e.g. 16 L"))
     t = k ≤ length(words) ? parse_value(join(words[k:end], " "); unit = temperature) : 20.0u"°C"
     t isa Unitful.Temperature || throw(ArgumentError("give the temperature of the water, e.g. 75 °C"))
-    return _label(words[1]), v, t
+    return label, v, t
 end
 
 add_water!(app::App) =
-    ask!(app, "Add water: its label, volume and temperature (e.g. strike_water 16 L 75 °C)") do app, text
+    ask!(app, "Add water: its label, volume and temperature (e.g. strike_water 16 L 75 °C)",
+         suggest_label(app.session, "water") * " ") do app, text
         p = units(app.session)
         label, v, temperature = parse_water(text; volume = preferred_unit(p, :volume),
                                             temperature = preferred_unit(p, :temperature))

@@ -20,7 +20,9 @@ answer!(app, text) = (app.mode.buffer = ""; press!(app, text * "\r"))
 
 ## An empty quiver
 
-`BrewQuiverTerm.run()` starts with an empty quiver; here, the same app without the terminal:
+`BrewQuiverTerm.run()` starts with an empty quiver (`a t` would start from a template
+instead: a single batch, a parti-gyle, a split batch, brew in a bag); here, the same app
+without the terminal:
 
 ```@example tut
 app = App(Session(Quiver()))
@@ -46,36 +48,61 @@ screen(app; height = 14)
 
 The new node is selected, and the message reminds us to connect it.
 
-## Lots of ingredients
+## Ingredients
 
-A lot is a label, an amount and an ingredient. The quiver has no ingredients yet, so the app
-offers to define it:
+`a i` lists the ingredients that can be added: water, those of the starter library (common
+malts, sugars, hops and yeasts, with typical values), yours (a BeerJSON library loaded with
+`L`), and the salts and acids of brewing water. Typing searches them:
 
 ```@example tut
-press!(app, "al")
-answer!(app, "pale 4.5 kg Pale ale malt")
-screen(app; height = 6)
+press!(app, "ai")
+press!(app, "pale")
+screen(app; height = 12)
+```
+
+`Enter` takes the one chosen, and asks for the label of the node and the amount (the words of
+a label are joined by `_`: `pale malt 4.5 kg` is `:pale_malt`):
+
+```@example tut
+press!(app, "\r")
+screen(app; height = 3)
 ```
 
 ```@example tut
-press!(app, "f")
-screen(app; height = 6)
+answer!(app, "pale 4.5 kg")
+nothing # hide
+```
+
+`a l` takes them typed, the name completed by `Tab`:
+
+```@example tut
+press!(app, "al"); press!(app, "crystal 0.3 kg crystal 6")
+screen(app; height = 3)
 ```
 
 ```@example tut
-answer!(app, "yield 80%, color 3 °L")
-press!(app, "al"); answer!(app, "crystal 0.3 kg Crystal 60")
-press!(app, "f"); answer!(app, "yield 74%, color 60 °L")
+press!(app, "\t\r")
 press!(app, "al"); answer!(app, "cascade 50 g Cascade")
-press!(app, "h"); answer!(app, "alpha 6%")
 press!(app, "al"); answer!(app, "yeast 1 US-05")
-press!(app, "c"); answer!(app, "attenuation 78%, form dry")
-screen(app; height = 16)
+screen(app; height = 14)
 ```
 
-Once defined, an ingredient is found by its name or a part of it: `pale2 1 kg pale` would
-take the same malt. Salts and acids are always known (`gypsum 4 g gypsum`), and a library of
-ingredients can be loaded with `L`.
+An ingredient known nowhere is defined on the way, by its properties:
+
+```@example tut
+press!(app, "al"); answer!(app, "honey 0.2 kg My honey malt")
+screen(app; height = 4)
+```
+
+```@example tut
+press!(app, "f"); answer!(app, "yield 78%, color 25 °L")
+app.message
+```
+
+```@example tut
+press!(app, "u")   # (not in this beer)
+nothing # hide
+```
 
 ## Stages
 
@@ -151,9 +178,9 @@ nothing # hide
 ## Editing in the cells
 
 `Tab` walks the cursor through the columns of the row (then the arrows leaving the node),
-and `e` edits the cell in place. On the ingredient of a lot, it offers those of its kind:
-`↓↑` choose, a letter jumps, `Enter` sets it (`Shift-↓↑` change it at once, without the
-list):
+(`→` `←` too), and `e` edits the cell in place. On an ingredient's name, it offers those of
+its kind, typed to search: `↓↑` choose, `Enter` sets it (`Shift-↓↑` change it at once,
+without the list):
 
 ```@example tut
 select!(app.session, NodeRef(:pale))

@@ -11,7 +11,7 @@ With it you can open a quiver or import a BeerJSON recipe, or start from nothing
 
 - see every node with its results (volume, gravity, ABV, IBU, color, temperature, mash pH),
   grouped by vessel, and each node or arrow in detail;
-- build and edit the quiver: lots of ingredients (defining new ones as you go), water and its
+- build and edit the quiver, from scratch or from a template: ingredients chosen in lists typed to search (defining new ones as you go), water and its
   profile, stages, arrows, equipment;
 - undo and redo every edit, with a history;
 - draw the quiver as a graph, see the timeline of the vessels, and solve for targets;

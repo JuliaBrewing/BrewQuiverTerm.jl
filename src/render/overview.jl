@@ -12,7 +12,7 @@ function next_text(arrows::Vector{<:ArrowSummary})
 end
 
 const STAGE_HEADER = ["", "Node", "Volume", "Gravity", "ABV", "IBU", "Color", "Temp.", "pH", "Next"]
-const LOT_HEADER = ["", "Lot", "Amount", "Ingredient", "Temp.", "Next"]
+const LOT_HEADER = ["", "Node", "Amount", "Ingredient", "Temp.", "Next"]
 
 # the columns of the cells of a row, after its marks and its label (see cells.jl)
 const STAGE_COLUMNS = [:volume, :gravity, :abv, :ibu, :color, :temperature, :ph]
@@ -90,10 +90,11 @@ function render_overview(s::Session; width::Integer = 100, cell = nothing, edit 
                     stage_row(s, summaries[n], get(out, n, ArrowSummary[]); column = col(n), edit = ed(n))
                 for n in labels]
         t = table(v === nothing ? LOT_HEADER : STAGE_HEADER, rows; maxwidth = 40)
-        title = v === nothing ? "lots" : plain(v)
+        title = v === nothing ? "ingredients" : plain(v)
         push!(panels, Panel(t; title, title_style = "bold " * ACCENT, width, fit = false,
                             style = DIM))
     end
-    isempty(panels) && return Panel(styled("an empty quiver: add a node", DIM); width, title = "quiver")
+    isempty(panels) && return Panel(styled("an empty quiver: a adds an ingredient, water or a stage, or starts " *
+                                           "from a template (a t)", DIM); width, title = "quiver")
     return reduce(/, panels)
 end

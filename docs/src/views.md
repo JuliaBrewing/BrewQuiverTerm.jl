@@ -13,7 +13,7 @@ in a notebook, and printed in color.
 
 ## The overview
 
-[`render_overview`](@ref): a panel for the lots and one for each vessel, in topological
+[`render_overview`](@ref): a panel for the ingredients (the nodes in no vessel) and one for each vessel, in topological
 order, with the results of each node and the arrows leaving it.
 
 ```@example views

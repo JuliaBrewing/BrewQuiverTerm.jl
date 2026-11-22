@@ -69,19 +69,19 @@ edit_lot_amount!(app, n, c, ::WaterLot) = edit_amount!(app, n, uconvert(u"L", vo
 edit_lot_amount!(app, n, c, ::AgentLot) = edit_amount!(app, n, total_mass(c), :agent)
 
 _why_not(n, ::Stage) = ":$n holds nothing: it is filled by its arrows"
-_why_not(n, ::Mixed) = ":$n holds several things: set them on the lots it comes from"
+_why_not(n, ::Mixed) = ":$n holds several things: set them on the nodes it comes from"
 _why_not(n, ::Holding) = ":$n has no such thing to set"
 
 # a computed value: a goal for it, then what to vary to reach it
 function solve_cell!(app::App, n::Symbol, c::Symbol)
     haskey(SOLVABLE, c) || return error!(app, "the $(COLUMN_NAMES[c]) of :$n is computed by the brew, and " *
-                                              "cannot be solved for: edit the lots and arrows that make it")
+                                              "cannot be solved for: edit the ingredients and arrows that make it")
     f, role = SOLVABLE[c]
     current = _computed(node_summary(app.session, n), c)
     current = current === missing ? nothing : current
     ask!(app, "Goal for the $(COLUMN_NAMES[c]) of :$n", current === nothing ? "" : qtext(app.session, current)) do app, text
         goal = parse_value(app.session, text, current)
-        ask!(app, "Reach $(COLUMN_NAMES[c]) $(qtext(app.session, goal)) at :$n by varying (lots scaled " *
+        ask!(app, "Reach $(COLUMN_NAMES[c]) $(qtext(app.session, goal)) at :$n by varying (ingredients scaled " *
                   "together, or an arrow field: kettle>wort.time)", join(_lots_of(app.session, n, role), " ")) do app, text
             solve!(app, Solve([Target(n, f, goal)], [_parameter(strip(text))]))
         end
@@ -112,65 +112,32 @@ end
 # ---------------------------------------------------------------------------------------
 # the ingredients of a lot
 
-# the ingredients of the kind of `ing` in the catalog of the session, by name
-function _same_kind(s, ing)
-    role = unit_role(ing)
-    return sort!([name for (name, i) in catalog(s) if unit_role(i) === role]; by = lowercase)
-end
+# the ingredients of the kind of `ing` in the catalog of the session, in natural order
+_same_kind(s, ing) = search_ingredients(s; role = unit_role(ing))
 
-"""
-    Picker(question, items, index, submit, back, cell)
+# the kind of an ingredient, shown next to it in lists
+ingredient_tag(i::Fermentable) = i.kind === :grain ? "malt" : replace(String(i.kind), '_' => ' ')
+ingredient_tag(::Hop) = "hop"
+ingredient_tag(i::Culture) = i.kind in (:ale, :lager) ? "$(i.kind) yeast" : String(i.kind)
+ingredient_tag(::Salt) = "salt"
+ingredient_tag(::Acid) = "acid"
+ingredient_tag(::AbstractIngredient) = ""
+ingredient_tags(s) = Dict(n => ingredient_tag(i) for (n, i) in catalog(s))
 
-A choice among `items` (strings), from `items[index]`, shown in place in the `cell` of the
-overview: ↓↑ move through them, a letter jumps to the next one starting with it, Enter calls
-`submit(app, item)`, Esc goes `back`.
-"""
-mutable struct Picker <: Mode
-    question::String
-    items::Vector{String}
-    index::Int
-    submit::Function
-    back::Mode
-    cell::Tuple{Symbol, Symbol}
-end
-
+# `e` on the ingredient of a lot: those of its kind, typed to search, or a new one defined
 function pick_ingredient!(app::App, n::Symbol, ing)
-    items = _same_kind(app.session, ing)
-    i = something(findfirst(==(ing.name), items), 1)
-    app.mode = Picker("Ingredient of :$n", items, i, (app, name) -> set_ingredient!(app, n, name),
-                      app.mode, (n, :ingredient))
+    role = unit_role(ing)
+    app.mode = Picker("Ingredient of :$n", _same_kind(app.session, ing); current = ing.name,
+                      submit = (app, name) -> set_ingredient!(app, n, name), back = app.mode,
+                      cell = (n, :ingredient), tags = ingredient_tags(app.session),
+                      search = text -> search_ingredients(app.session, text; role),
+                      create = (app, name) -> with_ingredient(app, name, typeof(ing)) do app, i
+                          edit!(app, SetIngredient(n, i))
+                      end)
     return app
 end
 
 set_ingredient!(app::App, n, name) = edit!(app, SetIngredient(n, catalog(app.session)[name]))
-
-function handle!(app::App, p::Picker, key)
-    k = length(p.items)
-    if key === :down
-        p.index = min(k, p.index + 1)
-    elseif key === :up
-        p.index = max(1, p.index - 1)
-    elseif key === :pagedown
-        p.index = min(k, p.index + 10)
-    elseif key === :pageup
-        p.index = max(1, p.index - 10)
-    elseif key === :home
-        p.index = 1
-    elseif key === :end
-        p.index = k
-    elseif key === :enter
-        app.mode = p.back
-        attempt(() -> p.submit(app, p.items[p.index]), app)
-    elseif key === :esc
-        app.mode = p.back
-    elseif key isa Char && isletter(key)
-        # the next item starting with the letter, after the current one
-        order = [mod1(p.index + j, k) for j in 1:k]
-        j = findfirst(i -> startswith(lowercase(p.items[i]), lowercase(key)), order)
-        j === nothing || (p.index = order[j])
-    end
-    return app
-end
 
 """
     next_ingredient!(app, step)
@@ -183,7 +150,7 @@ function next_ingredient!(app::App, step::Integer)
     n = current_node(app)
     c = n === nothing ? nothing : quiver(app.session)[n].initial
     (current_column(app) === :ingredient && holding(c) isa IngredientLot) ||
-        return error!(app, "Shift-↓↑ change the ingredient of a lot: Tab to its ingredient first")
+        return error!(app, "Shift-↓↑ change an ingredient: Tab to its name in the Ingredient column first")
     items = _same_kind(app.session, only(c.solids).ingredient)
     i = something(findfirst(==(only(c.solids).ingredient.name), items), 1)
     j = clamp(i + step, 1, length(items))
@@ -210,15 +177,15 @@ function explain_cell!(app::App)
     name = COLUMN_NAMES[c]
     if row_columns(app.session, n) === STAGE_COLUMNS
         haskey(SOLVABLE, c) && return info!(app, "the $name of :$n is computed by the brew: e sets a goal for " *
-                                                 "it, and solves for it by varying lots or an arrow field")
-        return info!(app, "the $name of :$n is computed by the brew, from the lots and arrows that make it")
+                                                 "it, and solves for it by varying ingredients or an arrow field")
+        return info!(app, "the $name of :$n is computed by the brew, from the ingredients and arrows that make it")
     end
     h = holding(quiver(app.session)[n].initial)
     c === :ingredient && h isa IngredientLot &&
         return info!(app, "the ingredient of :$n: e chooses another of its kind, Shift-↓↑ the next, previous one")
     c === :ingredient && h isa WaterLot &&
         return info!(app, "the water profile of :$n: e edits it, e.g. calcium 50, sulfate 100 (mg/L)")
-    c === :temperature && !(h isa WaterLot) && return info!(app, "only water lots have a temperature to set")
+    c === :temperature && !(h isa WaterLot) && return info!(app, "only water has a temperature to set")
     h isa Union{Stage, Mixed} && return info!(app, _why_not(n, h))
     return info!(app, "the $name of :$n: e edits it" *
                       (c === :temperature ? "" : " (a number without a unit is in the unit shown)"))

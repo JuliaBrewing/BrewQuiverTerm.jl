@@ -176,7 +176,7 @@ end
         @test occursin(":bottles", ls[2]) && occursin(r"Esc\s+back", ls[end-1])
         handle!(app, '?')
         @test !occursin("this help", render_text(render_app(app; width = 100, height = 30)))
-        for _ in 1:30; handle!(app, :down); end                # scrolled to the end
+        for _ in 1:50; handle!(app, :down); end                # scrolled to the end
         @test occursin("this help", render_text(render_app(app; width = 100, height = 30)))
         @test app.mode isa Help
         handle!(app, :esc); handle!(app, 'S')
