@@ -3,7 +3,7 @@
 
 # the arrows leaving a node: "Boil → wort" for a transformation, "→ grain_bed, kettle" for
 # transfers and drains
-function next_text(arrows::Vector{ArrowSummary})
+function next_text(arrows::Vector{<:ArrowSummary})
     isempty(arrows) && return styled("–", DIM)
     sel(a, t) = a.selected ? styled(t, SELECTED) : t
     length(arrows) == 1 && arrows[1].kind ∉ ("Transfer", "Drain") &&

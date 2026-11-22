@@ -25,7 +25,7 @@ end
 edit_item!(app::App, ::Nothing) = app
 function edit_item!(app::App, r::ArrowRef)
     a = quiver(app.session)[r.source => r.destination, r.index]
-    choices = Pair{Char, Tuple{String, Any}}['0' => ("kind", app -> arrow_kind!(app, r))]
+    choices = Pair{Char, Tuple{String, Function}}['0' => ("kind", app -> arrow_kind!(app, r))]
     for (i, f) in enumerate(fields(a))
         i ≤ 9 && push!(choices, Char('0' + i) => (f.label, app -> edit_field!(app, r, f)))
     end
