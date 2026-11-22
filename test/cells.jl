@@ -133,6 +133,28 @@ row(app, label) = only(l for l in split(frame(app), '\n') if occursin(Regex("\\b
     end
 end
 
+@testset "Enter edits, and the values proposed are replaced" begin
+    app = App(Session(single_batch()))
+    cell!(app, :pale, :amount); handle!(app, :enter)               # Enter: as e
+    @test app.mode isa Prompt && app.mode.buffer == "4.50 kg" && app.mode.fresh
+    @test occursin(r"type\s+replace", frame(app))
+    type!(app, "5"); handle!(app, :enter)                          # typing replaces it
+    @test only(quiver(app.session)[:pale].initial.solids).amount ≈ 5u"kg"
+    handle!(app, :enter); handle!(app, :backspace)                 # Backspace deletes it whole
+    @test app.mode.buffer == ""
+    handle!(app, :esc); handle!(app, :enter); handle!(app, :delete)
+    @test app.mode.buffer == ""
+    handle!(app, :esc); handle!(app, 'e'); handle!(app, :end); type!(app, "0")
+    @test app.mode.buffer == "5.00 kg0"                            # (End, → ←, Home: to change it)
+    handle!(app, :backspace); handle!(app, :backspace)
+    @test app.mode.buffer == "5.00 k"
+    handle!(app, :esc)
+    goto!(app, :pale); handle!(app, 'i')
+    @test app.mode isa Inspect
+    handle!(app, :enter)                                           # editing from the inspector
+    @test app.mode isa Confirm && occursin("Edit :pale", app.mode.question)
+end
+
 @testset "Templates" begin
     app = App(Session(Quiver()))
     @test occursin("template", frame(app))                     # the empty quiver says so

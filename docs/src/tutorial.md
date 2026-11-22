@@ -136,7 +136,7 @@ screen(app; height = 40)
 
 The batch brews, chilled to 20 °C before the fermentor: with no sparge, 16 L of water give a
 small, strong wort, which the next section fixes. The `⚠` on the mash is a warning of its
-mash pH: crystal malt was given no distilled water pH (the inspector, `Enter`, says so).
+mash pH: crystal malt was given no distilled water pH (the inspector, `i`, says so).
 
 ## Editing, and undo
 
@@ -216,11 +216,11 @@ nothing # hide
 
 ## Inspecting
 
-`Enter` shows the node of the cursor in detail:
+`i` shows the node of the cursor in detail:
 
 ```@example tut
 select!(app.session, NodeRef(:kettle))
-press!(app, "\r")
+press!(app, "i")
 screen(app; height = 32)
 ```
 

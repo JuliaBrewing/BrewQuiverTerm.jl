@@ -69,7 +69,7 @@ function handle!(app::App, ::DagView, key)
             layout!(app.session)
             info!(app, "arranged the nodes")
         end
-    elseif key === :enter
+    elseif key === 'i'
         current(app) === nothing || (app.mode = Inspect(); app.scroll = 0)
     elseif key in (:esc, 'q')
         app.mode = Browse()

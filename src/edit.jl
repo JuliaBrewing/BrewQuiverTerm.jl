@@ -126,7 +126,7 @@ end
 
 # the editing keys, common to browsing and inspecting; whether `key` was one
 function _edit_keys!(app::App, key)
-    if key === 'e'
+    if key in ('e', :enter)
         c = app.mode isa Browse ? current_column(app) : nothing
         c === nothing ? edit_item!(app, current(app)) : edit_cell!(app, current_node(app), c)
     elseif key === 'r'
