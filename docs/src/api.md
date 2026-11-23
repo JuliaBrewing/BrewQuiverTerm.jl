@@ -10,6 +10,15 @@ BrewQuiverTerm.run
 open_file
 ```
 
+## Colors
+
+```@docs
+THEMES
+theme_name
+color_mode
+adapt_colors
+```
+
 ## Rendering
 
 ```@docs

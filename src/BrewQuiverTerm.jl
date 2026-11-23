@@ -16,6 +16,7 @@ using Term: Term, Panel, RenderableText
 import REPL
 
 include("style.jl")
+include("colors.jl")
 include("render/overview.jl")
 include("render/inspect.jl")
 include("render/status.jl")
@@ -38,7 +39,7 @@ export render_overview, render_node, render_arrow, render_statusbar, render_text
 export render_picker, render_history, render_inventory, render_dag, render_timeline, render_solution, parse_solve, clock
 export App, Mode, Browse, Inspect, Help, Prompt, Confirm, HistoryView, DagView, TimelineView,
     SolutionView, InventoryView, Picker, handle!, decode_keys, render_app,
-    open_file
+    open_file, adapt_colors, color_mode, theme_name, THEMES
 
 # the API of BrewQuiverUICore (sessions, commands, undo and redo, view data, units, ...),
 # so that `using BrewQuiverTerm` is enough to script the app as well as to run it
