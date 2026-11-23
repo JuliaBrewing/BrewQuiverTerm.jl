@@ -52,6 +52,14 @@ using BrewQuiverTerm
 BrewQuiverTerm.run("bitter.quiver.json")     # a quiver; or a BeerJSON recipe, imported; or nothing
 ```
 
+The app paints its own dark background, so that it looks the same in every terminal
+(`theme = :terminal` keeps the terminal's), and writes 24-bit colors where the terminal says
+it shows them (`COLORTERM=truecolor`, as VS Code, iTerm2, Kitty, WezTerm do), else the 256
+colors of xterm, which themes leave alone (`colors = :truecolor` or `:ansi256` to choose).
+The variables `BREWQUIVER_THEME` and `BREWQUIVER_COLORS` set them for every run, e.g.
+`export BREWQUIVER_COLORS=truecolor` for a terminal that shows 24-bit colors without saying
+so.
+
 | keys | |
 |---|---|
 | `↓` `↑` `j` `k`, `PgDn` `PgUp`, `g` `G` | move between the nodes, in topological order |

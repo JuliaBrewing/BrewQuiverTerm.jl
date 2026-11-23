@@ -130,5 +130,6 @@ include("build.jl")
 include("brewing.jl")
 include("units.jl")
 include("cells.jl")
+include("colors.jl")
 
 end
